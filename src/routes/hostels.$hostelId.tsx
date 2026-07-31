@@ -41,7 +41,11 @@ export const Route = createFileRoute("/hostels/$hostelId")({
 });
 
 function HostelDetail() {
-  const { hostel, hostelRooms, residents } = Route.useLoaderData();
+  const { hostel, hostelRooms, residents } = Route.useLoaderData() as {
+    hostel: Hostel;
+    hostelRooms: Room[];
+    residents: Student[];
+  };
   const pct = Math.round((hostel.occupied / hostel.capacity) * 100);
 
   return (
