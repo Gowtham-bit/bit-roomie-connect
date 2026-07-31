@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RoommatesRouteImport } from './routes/roommates'
 import { Route as HostelsIndexRouteImport } from './routes/hostels.index'
 import { Route as HostelsHostelIdRouteImport } from './routes/hostels.$hostelId'
 
@@ -36,6 +37,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RoommatesRoute = RoommatesRouteImport.update({
+  id: '/roommates',
+  path: '/roommates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostelsIndexRoute = HostelsIndexRouteImport.update({
   id: '/hostels/',
   path: '/hostels/',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels': typeof HostelsIndexRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  RoommatesRoute: typeof RoommatesRoute
   HostelsHostelIdRoute: typeof HostelsHostelIdRoute
   HostelsIndexRoute: typeof HostelsIndexRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/roommates': {
+      id: '/roommates'
+      path: '/roommates'
+      fullPath: '/roommates'
+      preLoaderRoute: typeof RoommatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hostels/': {
       id: '/hostels/'
       path: '/hostels'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  RoommatesRoute: RoommatesRoute,
   HostelsHostelIdRoute: HostelsHostelIdRoute,
   HostelsIndexRoute: HostelsIndexRoute,
 }
