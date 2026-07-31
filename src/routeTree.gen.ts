@@ -10,9 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApplyRouteImport } from './routes/apply'
+import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as ComplaintsRouteImport } from './routes/complaints'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PaymentsRouteImport } from './routes/payments'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RequestsRouteImport } from './routes/requests'
+import { Route as RoomChangeRouteImport } from './routes/room-change'
 import { Route as RoommatesRouteImport } from './routes/roommates'
 import { Route as HostelsIndexRouteImport } from './routes/hostels.index'
 import { Route as HostelsHostelIdRouteImport } from './routes/hostels.$hostelId'
@@ -20,6 +28,21 @@ import { Route as HostelsHostelIdRouteImport } from './routes/hostels.$hostelId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyRoute = ApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttendanceRoute = AttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplaintsRoute = ComplaintsRouteImport.update({
+  id: '/complaints',
+  path: '/complaints',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -32,9 +55,34 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsRoute = PaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestsRoute = RequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoomChangeRoute = RoomChangeRouteImport.update({
+  id: '/room-change',
+  path: '/room-change',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RoommatesRoute = RoommatesRouteImport.update({
@@ -55,18 +103,34 @@ const HostelsHostelIdRoute = HostelsHostelIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/apply': typeof ApplyRoute
+  '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/requests': typeof RequestsRoute
+  '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/apply': typeof ApplyRoute
+  '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/requests': typeof RequestsRoute
+  '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels': typeof HostelsIndexRoute
@@ -74,9 +138,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/apply': typeof ApplyRoute
+  '/attendance': typeof AttendanceRoute
+  '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/requests': typeof RequestsRoute
+  '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
@@ -85,27 +157,51 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/apply'
+    | '/attendance'
+    | '/complaints'
     | '/dashboard'
     | '/login'
+    | '/notifications'
+    | '/payments'
+    | '/profile'
     | '/register'
+    | '/requests'
+    | '/room-change'
     | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/apply'
+    | '/attendance'
+    | '/complaints'
     | '/dashboard'
     | '/login'
+    | '/notifications'
+    | '/payments'
+    | '/profile'
     | '/register'
+    | '/requests'
+    | '/room-change'
     | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels'
   id:
     | '__root__'
     | '/'
+    | '/apply'
+    | '/attendance'
+    | '/complaints'
     | '/dashboard'
     | '/login'
+    | '/notifications'
+    | '/payments'
+    | '/profile'
     | '/register'
+    | '/requests'
+    | '/room-change'
     | '/roommates'
     | '/hostels/$hostelId'
     | '/hostels/'
@@ -113,9 +209,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApplyRoute: typeof ApplyRoute
+  AttendanceRoute: typeof AttendanceRoute
+  ComplaintsRoute: typeof ComplaintsRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
+  PaymentsRoute: typeof PaymentsRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  RequestsRoute: typeof RequestsRoute
+  RoomChangeRoute: typeof RoomChangeRoute
   RoommatesRoute: typeof RoommatesRoute
   HostelsHostelIdRoute: typeof HostelsHostelIdRoute
   HostelsIndexRoute: typeof HostelsIndexRoute
@@ -128,6 +232,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply': {
+      id: '/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof ApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendance': {
+      id: '/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/complaints': {
+      id: '/complaints'
+      path: '/complaints'
+      fullPath: '/complaints'
+      preLoaderRoute: typeof ComplaintsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -144,11 +269,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requests': {
+      id: '/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof RequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/room-change': {
+      id: '/room-change'
+      path: '/room-change'
+      fullPath: '/room-change'
+      preLoaderRoute: typeof RoomChangeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roommates': {
@@ -177,9 +337,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApplyRoute: ApplyRoute,
+  AttendanceRoute: AttendanceRoute,
+  ComplaintsRoute: ComplaintsRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
+  PaymentsRoute: PaymentsRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  RequestsRoute: RequestsRoute,
+  RoomChangeRoute: RoomChangeRoute,
   RoommatesRoute: RoommatesRoute,
   HostelsHostelIdRoute: HostelsHostelIdRoute,
   HostelsIndexRoute: HostelsIndexRoute,
