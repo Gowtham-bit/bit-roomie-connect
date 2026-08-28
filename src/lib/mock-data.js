@@ -14,7 +14,7 @@ const rand = mulberry32(20260731);
 const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 const int = (min, max) => min + Math.floor(rand() * (max - min + 1));
 const FIRST_M = [
-    "Aravind", "Karthik", "Surya", "Vignesh", "Hariharan", "Dinesh", "Mohan", "Bala",
+    "Gowtham", "Karthik", "Surya", "Vignesh", "Hariharan", "Dinesh", "Mohan", "Bala",
     "Praveen", "Sanjay", "Rohit", "Naveen", "Manoj", "Ashwin", "Gokul", "Rahul",
     "Sathish", "Vimal", "Yuvaraj", "Aditya", "Nithin", "Prem", "Kavin", "Jeevan",
 ];
@@ -111,7 +111,7 @@ export const hostels = HOSTEL_NAMES.map(([name, type], i) => {
         occupied: Math.floor(capacity * (0.55 + rand() * 0.4)),
         warden: `${pick(type === "Boys" ? FIRST_M : FIRST_F)} ${pick(LAST)}`,
         facilities: blockFacilities,
-        image: `https://images.unsplash.com/photo-${["1555854877-bab0e564b8d5", "1522708323590-d24dbb6b0267", "1560448204-e02f11c3d0e2", "1586023492125-27b2c045efd7"][i % 4]}?auto=format&fit=crop&w=900&q=70`,
+        image: "https://www.bitsathy.ac.in/wp-content/uploads/2022/09/gentshostel.jpg",
     };
 });
 export const rooms = (() => {
@@ -291,13 +291,13 @@ export const matches = students
     .sort((a, b) => b.compatibility - a.compatibility);
 export const currentStudent = {
     ...students[0],
-    name: "Aravind Subramanian",
+    name: "Gowtham",
     regNo: "7376242AD142",
     department: "Artificial Intelligence and Data Science",
     dept: "AIDS",
     year: 3,
     gender: "Male",
-    email: "aravind.aids@bitsathy.ac.in",
+    email: "gowtham.aids@bitsathy.ac.in",
     mobile: "9843217650",
     hostel: "Sapphire Block",
     room: "312",

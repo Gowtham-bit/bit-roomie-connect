@@ -93,7 +93,7 @@ function RegisterPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Full name" error={errors.name?.message}>
-                <Input placeholder="Aravind Subramanian" {...register("name", { required: "Name is required" })}/>
+                <Input placeholder="Gowtham" {...register("name", { required: "Name is required" })}/>
               </Field>
               <Field label="Register number" error={errors.regNo?.message}>
                 <Input placeholder="7376242AD142" {...register("regNo", {
