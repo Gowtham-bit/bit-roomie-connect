@@ -18,9 +18,7 @@ export function SiteNavbar() {
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
       <nav className="glass mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-3 shadow-soft">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="gradient-primary flex size-9 items-center justify-center rounded-xl text-primary-foreground shadow-elegant">
-            <Building2 className="size-5" />
-          </span>
+          <img src="/bit-logo.png" alt="BIT Logo" className="h-10 w-auto object-contain bg-white rounded-xl p-1 shadow-soft" />
           <span className="font-display text-base leading-tight font-extrabold">
             BIT Hostel
             <span className="block text-[11px] font-medium text-muted-foreground">

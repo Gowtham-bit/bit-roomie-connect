@@ -7,9 +7,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="gradient-primary flex size-9 items-center justify-center rounded-xl text-primary-foreground">
-              <Building2 className="size-5" />
-            </span>
+            <img src="/bit-logo.png" alt="BIT Logo" className="h-10 w-auto object-contain bg-white rounded-xl p-1 shadow-soft" />
             <span className="font-display font-extrabold">BIT Hostel Portal</span>
           </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">

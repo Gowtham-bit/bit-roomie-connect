@@ -16,7 +16,7 @@ export const Route = createFileRoute("/hostels/")({
       {
         name: "description",
         content:
-          "Browse all ten BIT hostel blocks with live room availability, occupancy, floors and facilities.",
+          "Browse all 13 BIT hostel blocks with live room availability, occupancy, floors and facilities.",
       },
       { property: "og:title", content: "Hostel Availability · BIT Hostel Portal" },
       {

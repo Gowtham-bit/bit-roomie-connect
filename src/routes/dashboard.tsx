@@ -65,7 +65,7 @@ const statusPie = [
 ];
 
 const activity = [
-  ["Room 312 allocated in Kaveri Block", "2 days ago", "success"],
+  ["Room 312 allocated in Sapphire Block", "2 days ago", "success"],
   ["Roommate request sent to Karthik V.", "3 days ago", "primary"],
   ["Complaint C-042 marked In Progress", "5 days ago", "warning"],
   ["Term I hostel fee payment received", "1 week ago", "success"],
@@ -94,7 +94,7 @@ function Dashboard() {
         <div className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard icon={Home} label="Hostel status" value="Allocated" trend="Confirmed" tone="accent" />
-            <StatCard icon={BedDouble} label="Allocated room" value="Kaveri 312" tone="primary" />
+            <StatCard icon={BedDouble} label="Allocated room" value="Sapphire 312" tone="primary" />
             <StatCard icon={CalendarCheck} label="Attendance" value={`${pct}%`} tone="accent" />
             <StatCard icon={Wrench} label="Pending requests" value={3} tone="warning" />
           </div>

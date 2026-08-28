@@ -30,32 +30,68 @@ export const Route = createFileRoute("/roommates")({
   component: RoommatesPage,
 });
 
-const questions: Array<{ id: string; q: string; options: string[] }> = [
-  { id: "sleep", q: "What time do you usually sleep?", options: ["Before 10 PM", "10 PM – 12 AM", "After midnight"] },
-  { id: "wake", q: "What time do you wake up?", options: ["Before 5:30 AM", "5:30 – 7 AM", "After 7 AM"] },
-  { id: "study", q: "When do you study best?", options: ["Early morning", "Afternoon", "Late night"] },
-  { id: "clean", q: "How tidy do you keep the room?", options: ["Spotless always", "Tidy most days", "Relaxed about it"] },
-  { id: "smoke", q: "Do you smoke?", options: ["No", "Occasionally", "Yes"] },
-  { id: "drink", q: "Do you drink?", options: ["No", "Occasionally", "Yes"] },
-  { id: "music", q: "How do you listen to music?", options: ["Headphones only", "Low speaker volume", "Loud speakers"] },
-  { id: "gaming", q: "How often do you game?", options: ["Rarely", "Weekends", "Daily"] },
-  { id: "sports", q: "Do you play sports?", options: ["Daily", "Weekends", "Rarely"] },
-  { id: "food", q: "Food habit", options: ["Vegetarian", "Non-vegetarian", "Eggetarian"] },
-  { id: "language", q: "Preferred language at home", options: ["Tamil", "English", "Telugu / Malayalam", "Hindi"] },
-  { id: "hometown", q: "Hometown region", options: ["Kongu belt", "Chennai / North TN", "South TN", "Outside TN"] },
-  { id: "dept", q: "Prefer a roommate from", options: ["My department", "Any department", "Different department"] },
-  { id: "year", q: "Prefer a roommate from", options: ["My year", "Senior", "Junior", "No preference"] },
-  { id: "temp", q: "Room temperature preference", options: ["Cool", "Moderate", "Warm"] },
-  { id: "ac", q: "AC preference", options: ["AC room", "Non-AC room", "No preference"] },
-  { id: "visitors", q: "How often do friends visit your room?", options: ["Rarely", "Sometimes", "Very often"] },
-  { id: "lights", q: "Do you sleep with lights on?", options: ["Lights off", "Night lamp", "Lights on"] },
-  { id: "noise", q: "Preferred noise level", options: ["Silent", "Moderate", "Lively"] },
-  { id: "personality", q: "How would you describe yourself?", options: ["Introvert", "Ambivert", "Extrovert"] },
-  { id: "group", q: "Do you like group study?", options: ["Yes, often", "Sometimes", "Prefer studying alone"] },
-  { id: "religion", q: "Religious practice in room", options: ["Daily prayer", "Occasional", "Not applicable"] },
-  { id: "weekend", q: "Typical weekend", options: ["Go home", "Stay in hostel", "Outings with friends"] },
-  { id: "share", q: "Sharing personal items", options: ["Comfortable", "Ask first", "Prefer not to"] },
-  { id: "call", q: "Late night phone calls", options: ["Never", "Occasionally", "Frequently"] },
+type Question = {
+  id: string;
+  q: string;
+  options: string[];
+  multi?: boolean;
+  max?: number;
+};
+
+const questions: Question[] = [
+  {
+    id: "sleep",
+    q: "What time do you usually go to sleep?",
+    options: ["Before 10 PM", "10 PM–12 AM", "After 12 AM"],
+  },
+  {
+    id: "wake",
+    q: "What time do you usually wake up?",
+    options: ["Before 6 AM", "6–8 AM", "After 8 AM"],
+  },
+  {
+    id: "clean",
+    q: "How would you describe your cleanliness?",
+    options: ["Very Clean", "Moderately Clean", "Doesn't Matter"],
+  },
+  {
+    id: "noise",
+    q: "Do you prefer a quiet room?",
+    options: ["Yes", "Moderate Noise", "Doesn't Matter"],
+  },
+  {
+    id: "personality",
+    q: "What is your personality type?",
+    options: ["Introvert", "Extrovert", "Ambivert"],
+  },
+  {
+    id: "study",
+    q: "What is your preferred study time?",
+    options: ["Morning", "Afternoon", "Evening", "Night"],
+  },
+  {
+    id: "food",
+    q: "What is your food preference?",
+    options: ["Vegetarian", "Non-Vegetarian", "Vegan"],
+  },
+  {
+    id: "visitors",
+    q: "Are you comfortable with visitors in the room?",
+    options: ["Yes", "Occasionally", "No"],
+  },
+  {
+    id: "hobbies",
+    q: "Which hobbies do you enjoy?",
+    options: ["Reading", "Coding", "Gaming", "Sports", "Music", "Movies", "Gym", "Photography"],
+    multi: true,
+  },
+  {
+    id: "qualities",
+    q: "What qualities do you expect in a roommate?",
+    options: ["Clean", "Friendly", "Quiet", "Responsible", "Studious", "Respectful", "Organized", "Social"],
+    multi: true,
+    max: 3,
+  },
 ];
 
 function RoommatesPage() {
@@ -67,16 +103,39 @@ function RoommatesPage() {
 
   const current = questions[step]!;
   const progress = Math.round(((step + (answers[current.id] ? 1 : 0)) / questions.length) * 100);
-  const answered = Object.keys(answers).length;
+  const answered = Object.keys(answers).filter((k) => !!answers[k]).length;
 
   const results = useMemo(
     () => matches.filter((m) => !rejected.includes(m.matchId)).slice(0, 9),
     [rejected],
   );
 
+  const isSelected = (o: string) => {
+    if (current.multi) {
+      const list = answers[current.id] ? answers[current.id]!.split(", ") : [];
+      return list.includes(o);
+    }
+    return answers[current.id] === o;
+  };
+
   const select = (value: string) => {
-    setAnswers((a) => ({ ...a, [current.id]: value }));
-    if (step < questions.length - 1) setTimeout(() => setStep((s) => s + 1), 160);
+    if (current.multi) {
+      const currentList = answers[current.id] ? answers[current.id]!.split(", ") : [];
+      let updated: string[];
+      if (currentList.includes(value)) {
+        updated = currentList.filter((v) => v !== value);
+      } else {
+        if (current.max && currentList.length >= current.max) {
+          toast.info(`You can select up to ${current.max} qualities`);
+          return;
+        }
+        updated = [...currentList, value];
+      }
+      setAnswers((a) => ({ ...a, [current.id]: updated.join(", ") }));
+    } else {
+      setAnswers((a) => ({ ...a, [current.id]: value }));
+      if (step < questions.length - 1) setTimeout(() => setStep((s) => s + 1), 160);
+    }
   };
 
   return (
@@ -117,10 +176,18 @@ function RoommatesPage() {
                 transition={{ duration: 0.25 }}
                 className="mt-8"
               >
-                <h2 className="text-2xl font-extrabold">{current.q}</h2>
-                <div className="mt-6 grid gap-3">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h2 className="text-2xl font-extrabold">{current.q}</h2>
+                  {current.multi && (
+                    <span className="text-xs text-muted-foreground font-normal">
+                      {current.max ? `(Select up to ${current.max})` : "(Select multiple)"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {current.options.map((o) => {
-                    const active = answers[current.id] === o;
+                    const active = isSelected(o);
                     return (
                       <button
                         key={o}
@@ -170,8 +237,11 @@ function RoommatesPage() {
                   <Sparkles className="size-4" /> See my matches
                 </Button>
               ) : (
-                <Button variant="outline" onClick={() => setStep((s) => s + 1)}>
-                  Skip <ArrowRight className="size-4" />
+                <Button
+                  variant={current.multi && answers[current.id] ? "hero" : "outline"}
+                  onClick={() => setStep((s) => s + 1)}
+                >
+                  Next <ArrowRight className="size-4" />
                 </Button>
               )}
             </div>

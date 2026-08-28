@@ -168,27 +168,50 @@ export type AttendanceRecord = {
 };
 
 const HOSTEL_NAMES: Array<[string, "Boys" | "Girls"]> = [
-  ["Kaveri Block", "Boys"],
-  ["Bhavani Block", "Boys"],
-  ["Amaravathi Block", "Boys"],
-  ["Vaigai Block", "Boys"],
-  ["Thamirabarani Block", "Boys"],
-  ["Nila Block", "Girls"],
-  ["Malligai Block", "Girls"],
-  ["Sengamalam Block", "Girls"],
-  ["Ponni Block", "Girls"],
-  ["Sitrarasi Block", "Girls"],
+  ["Sapphire Block", "Boys"],
+  ["Emerald Block", "Boys"],
+  ["Ruby Block", "Boys"],
+  ["Diamond Block", "Boys"],
+  ["Coral Block", "Boys"],
+  ["Pearl Block", "Boys"],
+  ["Ganga Block", "Girls"],
+  ["Yamuna Block", "Girls"],
+  ["Narmadha Block", "Girls"],
+  ["Cauvery Block", "Girls"],
+  ["North Bhavani Block", "Girls"],
+  ["South Bhavani Block", "Girls"],
+  ["Old Bhavani Block", "Girls"],
 ];
 
 const FACILITIES = [
-  "Wi-Fi","Study Table","Attached Bathroom","Hot Water","Laundry","Gym",
-  "Reading Room","RO Water","CCTV","Power Backup","Mess","Sports Court",
+  "Wi-Fi", "Study Table", "Hot Water", "Gym", "Laundry", "RO Water",
+  "CCTV", "Power Backup", "Mess", "Sports Court", "Attached Bathroom", "AC",
 ];
 
 export const hostels: Hostel[] = HOSTEL_NAMES.map(([name, type], i) => {
   const floors = int(3, 6);
   const totalRooms = int(20, 32);
-  const capacity = totalRooms * 4;
+
+  const commonBlockFacilities = [
+    "Wi-Fi", "Study Table", "Hot Water", "Gym", "Laundry", "RO Water",
+    "CCTV", "Power Backup", "Mess", "Sports Court"
+  ];
+  const blockFacilities = [...commonBlockFacilities];
+  if (name.includes("Coral")) {
+    blockFacilities.push("AC", "Attached Bathroom");
+  }
+
+  const avgCap = (name.includes("Sapphire") || name.includes("Emerald") || name.includes("Pearl"))
+    ? 4
+    : name.includes("Coral")
+      ? 1.5
+      : name.includes("Ruby")
+        ? 3
+        : name.includes("Diamond")
+          ? 2.3
+          : 3;
+
+  const capacity = Math.round(totalRooms * avgCap);
   return {
     id: `H${String(i + 1).padStart(2, "0")}`,
     name,
@@ -198,7 +221,7 @@ export const hostels: Hostel[] = HOSTEL_NAMES.map(([name, type], i) => {
     capacity,
     occupied: Math.floor(capacity * (0.55 + rand() * 0.4)),
     warden: `${pick(type === "Boys" ? FIRST_M : FIRST_F)} ${pick(LAST)}`,
-    facilities: FACILITIES.slice(0, 6).concat(pick(FACILITIES) as string),
+    facilities: blockFacilities,
     image: `https://images.unsplash.com/photo-${
       (["1555854877-bab0e564b8d5", "1522708323590-d24dbb6b0267", "1560448204-e02f11c3d0e2", "1586023492125-27b2c045efd7"][i % 4] as string)
     }?auto=format&fit=crop&w=900&q=70`,
@@ -211,7 +234,45 @@ export const rooms: Room[] = (() => {
   while (list.length < 250) {
     const h = hostels[n % hostels.length]!;
     const floor = int(0, h.floors - 1);
-    const capacity = pick([2, 3, 4, 4] as const);
+
+    let capacity: number;
+    let roomType: "AC" | "Non-AC" = "Non-AC";
+    let hasAttachedBathroom = false;
+
+    if (h.name.includes("Sapphire") || h.name.includes("Emerald") || h.name.includes("Pearl")) {
+      capacity = 4;
+      roomType = "Non-AC";
+      hasAttachedBathroom = false;
+    } else if (h.name.includes("Ruby")) {
+      capacity = pick([2, 4]);
+      roomType = "Non-AC";
+      hasAttachedBathroom = false;
+    } else if (h.name.includes("Coral")) {
+      capacity = pick([1, 2]);
+      roomType = "AC";
+      hasAttachedBathroom = true;
+    } else if (h.name.includes("Diamond")) {
+      capacity = pick([1, 2, 4]);
+      roomType = "Non-AC";
+      hasAttachedBathroom = false;
+    } else {
+      capacity = pick([2, 3, 4]);
+      roomType = "Non-AC";
+      hasAttachedBathroom = false;
+    }
+
+    const roomFacilities: string[] = ["Wi-Fi", "Study Table", "Hot Water"];
+    if (hasAttachedBathroom) {
+      roomFacilities.push("Attached Bathroom");
+    }
+    if (roomType === "AC") {
+      roomFacilities.push("AC");
+    }
+
+    const rent = roomType === "AC"
+      ? (capacity === 1 ? 110000 : 95000)
+      : (capacity === 1 ? 78000 : capacity === 2 ? 64000 : capacity === 3 ? 56000 : 48000);
+
     list.push({
       id: `R${String(list.length + 1).padStart(3, "0")}`,
       hostelId: h.id,
@@ -220,9 +281,9 @@ export const rooms: Room[] = (() => {
       floor,
       capacity,
       occupied: int(0, capacity),
-      type: rand() > 0.6 ? "AC" : "Non-AC",
-      rent: capacity === 2 ? 78000 : capacity === 3 ? 64000 : 52000,
-      facilities: [...FACILITIES].sort(() => rand() - 0.5).slice(0, 5),
+      type: roomType,
+      rent,
+      facilities: roomFacilities,
     });
     n++;
   }
@@ -365,7 +426,7 @@ export const currentStudent: Student = {
   gender: "Male",
   email: "aravind.aids@bitsathy.ac.in",
   mobile: "9843217650",
-  hostel: "Kaveri Block",
+  hostel: "Sapphire Block",
   room: "312",
   avatar: "https://i.pravatar.cc/160?img=12",
 };

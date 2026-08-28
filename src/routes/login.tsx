@@ -71,9 +71,7 @@ function LoginPage() {
         className="glass relative w-full max-w-md rounded-3xl p-7 shadow-elegant sm:p-9"
       >
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="gradient-primary flex size-10 items-center justify-center rounded-xl text-primary-foreground">
-            <Building2 className="size-5" />
-          </span>
+          <img src="/bit-logo.png" alt="BIT Logo" className="h-10 w-auto object-contain bg-white rounded-xl p-1 shadow-soft" />
           <span className="font-display font-extrabold">BIT Hostel Portal</span>
         </Link>
 

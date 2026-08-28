@@ -130,10 +130,8 @@ export function AppShell({
 
   const sidebar = (
     <div className="flex h-full flex-col">
-      <Link to="/" className="flex items-center gap-2.5 px-5 py-5">
-        <span className="gradient-primary flex size-9 items-center justify-center rounded-xl text-primary-foreground">
-          <Building2 className="size-5" />
-        </span>
+      <Link to="/dashboard" className="flex items-center gap-2.5 px-5 py-5">
+        <img src="/bit-logo.png" alt="BIT Logo" className="h-10 w-auto object-contain bg-white rounded-xl p-1 shadow-soft" />
         <span className="font-display text-sm leading-tight font-extrabold">
           BIT Hostel
           <span className="block text-[11px] font-medium text-muted-foreground capitalize">
@@ -324,7 +322,7 @@ export function AppShell({
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Link to="/" className="hover:text-primary">
+                  <Link to="/dashboard" className="hover:text-primary">
                     Home
                   </Link>
                   {(breadcrumb ?? [title]).map((b) => (
