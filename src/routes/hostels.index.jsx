@@ -7,53 +7,85 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { hostels } from "@/lib/mock-data";
+import { useHostels } from "@/hooks/use-hostel-api";
+
 export const Route = createFileRoute("/hostels/")({
-    head: () => ({
-        meta: [
-            { title: "Hostel Availability · BIT Hostel Portal" },
-            {
-                name: "description",
-                content: "Browse all 13 BIT hostel blocks with live room availability, occupancy, floors and facilities.",
-            },
-            { property: "og:title", content: "Hostel Availability · BIT Hostel Portal" },
-            {
-                property: "og:description",
-                content: "Search, filter and compare boys and girls hostel blocks before you apply.",
-            },
-        ],
-    }),
-    component: HostelsPage,
+  head: () => ({
+    meta: [
+      { title: "Hostel Availability · BIT Hostel Portal" },
+      {
+        name: "description",
+        content:
+          "Browse all 13 BIT hostel blocks with live room availability, occupancy, floors and facilities.",
+      },
+      { property: "og:title", content: "Hostel Availability · BIT Hostel Portal" },
+      {
+        property: "og:description",
+        content: "Search, filter and compare boys and girls hostel blocks before you apply.",
+      },
+    ],
+  }),
+  component: HostelsPage,
 });
+
 function HostelsPage() {
-    const [q, setQ] = useState("");
-    const [type, setType] = useState("All");
-    const [sort, setSort] = useState("availability");
-    const list = useMemo(() => {
-        let l = hostels.filter((h) => h.name.toLowerCase().includes(q.toLowerCase()) && (type === "All" || h.type === type));
-        l = [...l].sort((a, b) => sort === "availability"
-            ? b.capacity - b.occupied - (a.capacity - a.occupied)
-            : sort === "capacity"
-                ? b.capacity - a.capacity
-                : a.name.localeCompare(b.name));
-        return l;
-    }, [q, type, sort]);
-    return (<AppShell title="Hostel availability" breadcrumb={["Hostels"]} actions={<Button asChild variant="hero">
+  const [q, setQ] = useState("");
+  const [type, setType] = useState("All");
+  const [sort, setSort] = useState("availability");
+
+  const { data: hostelsData = [] } = useHostels(type, q);
+
+  const list = useMemo(() => {
+    let l = Array.isArray(hostelsData) ? hostelsData : [];
+    l = [...l].sort((a, b) =>
+      sort === "availability"
+        ? b.capacity - b.occupied - (a.capacity - a.occupied)
+        : sort === "capacity"
+          ? b.capacity - a.capacity
+          : a.name.localeCompare(b.name),
+    );
+    return l;
+  }, [hostelsData, sort]);
+  return (
+    <AppShell
+      title="Hostel availability"
+      breadcrumb={["Hostels"]}
+      actions={
+        <Button asChild variant="hero">
           <Link to="/apply">Apply for hostel</Link>
-        </Button>}>
+        </Button>
+      }
+    >
       <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft">
         <div className="relative min-w-56 flex-1">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"/>
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search hostel block" className="pl-9" aria-label="Search hostels"/>
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search hostel block"
+            className="pl-9"
+            aria-label="Search hostels"
+          />
         </div>
         <div className="flex gap-1 rounded-xl bg-muted p-1">
-          {["All", "Boys", "Girls"].map((t) => (<button key={t} onClick={() => setType(t)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}>
+          {["All", "Boys", "Girls"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}
+            >
               {t}
-            </button>))}
+            </button>
+          ))}
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="size-4 text-muted-foreground"/>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort hostels" className="h-9 rounded-xl border border-input bg-background px-3 text-sm">
+          <Filter className="size-4 text-muted-foreground" />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            aria-label="Sort hostels"
+            className="h-9 rounded-xl border border-input bg-background px-3 text-sm"
+          >
             <option value="availability">Most available</option>
             <option value="capacity">Largest capacity</option>
             <option value="name">Name A–Z</option>
@@ -63,12 +95,27 @@ function HostelsPage() {
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {list.map((h, i) => {
-            const available = h.capacity - h.occupied;
-            const pct = Math.round((h.occupied / h.capacity) * 100);
-            return (<motion.article key={h.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="group overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-elegant">
+          const available = h.capacity - h.occupied;
+          const pct = Math.round((h.occupied / h.capacity) * 100);
+          return (
+            <motion.article
+              key={h.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="group overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-elegant"
+            >
               <div className="relative h-36 overflow-hidden bg-muted">
-                <img src={h.image} alt={h.name} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-                <Badge className="absolute top-3 left-3" variant={h.type === "Boys" ? "default" : "secondary"}>
+                <img
+                  src={h.image}
+                  alt={h.name}
+                  loading="lazy"
+                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <Badge
+                  className="absolute top-3 left-3"
+                  variant={h.type === "Boys" ? "default" : "secondary"}
+                >
                   {h.type}
                 </Badge>
               </div>
@@ -80,13 +127,13 @@ function HostelsPage() {
                       {h.floors} floors · Warden {h.warden}
                     </p>
                   </div>
-                  <Building2 className="size-5 text-primary"/>
+                  <Building2 className="size-5 text-primary" />
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <Mini label="Available" value={available} tone="text-accent"/>
-                  <Mini label="Occupied" value={h.occupied} tone="text-primary"/>
-                  <Mini label="Capacity" value={h.capacity}/>
+                  <Mini label="Available" value={available} tone="text-accent" />
+                  <Mini label="Occupied" value={h.occupied} tone="text-primary" />
+                  <Mini label="Capacity" value={h.capacity} />
                 </div>
 
                 <div className="mt-4">
@@ -94,13 +141,15 @@ function HostelsPage() {
                     <span>Occupancy</span>
                     <span className="font-semibold text-foreground">{pct}%</span>
                   </div>
-                  <Progress value={pct} className="mt-1.5"/>
+                  <Progress value={pct} className="mt-1.5" />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  {h.facilities.slice(0, 4).map((f) => (<Badge key={f} variant="outline" className="rounded-full text-[11px]">
+                  {h.facilities.slice(0, 4).map((f) => (
+                    <Badge key={f} variant="outline" className="rounded-full text-[11px]">
                       {f}
-                    </Badge>))}
+                    </Badge>
+                  ))}
                 </div>
 
                 <Button asChild variant="soft" className="mt-5 w-full">
@@ -109,20 +158,28 @@ function HostelsPage() {
                   </Link>
                 </Button>
               </div>
-            </motion.article>);
+            </motion.article>
+          );
         })}
       </div>
 
-      {list.length === 0 && (<div className="rounded-2xl border border-dashed p-14 text-center">
-          <Users className="mx-auto size-8 text-muted-foreground"/>
+      {list.length === 0 && (
+        <div className="rounded-2xl border border-dashed p-14 text-center">
+          <Users className="mx-auto size-8 text-muted-foreground" />
           <p className="mt-3 font-semibold">No hostels match your filters</p>
-          <p className="text-sm text-muted-foreground">Try a different search term or block type.</p>
-        </div>)}
-    </AppShell>);
+          <p className="text-sm text-muted-foreground">
+            Try a different search term or block type.
+          </p>
+        </div>
+      )}
+    </AppShell>
+  );
 }
 function Mini({ label, value, tone }) {
-    return (<div className="rounded-xl bg-muted/60 py-2">
+  return (
+    <div className="rounded-xl bg-muted/60 py-2">
       <p className={`font-display text-lg font-bold ${tone ?? ""}`}>{value}</p>
       <p className="text-[11px] text-muted-foreground">{label}</p>
-    </div>);
+    </div>
+  );
 }

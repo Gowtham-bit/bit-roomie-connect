@@ -14,27 +14,27 @@ The design should look similar to modern websites like Airbnb, Notion, and Micro
 
 Use:
 
- React
+React
 
- Vite
+Vite
 
- React Router
+React Router
 
- Tailwind CSS
+Tailwind CSS
 
- Framer Motion
+Framer Motion
 
- React Icons
+React Icons
 
- Axios
+Axios
 
- React Hook Form
+React Hook Form
 
- SweetAlert2
+SweetAlert2
 
- Chart.js
+Chart.js
 
- Lucide Icons
+Lucide Icons
 
 The application should support both desktop and mobile devices.
 
@@ -66,43 +66,43 @@ Pages Required
 
 Hero Section containing
 
- College Logo
+College Logo
 
- Project Name
+Project Name
 
- Background Illustration
+Background Illustration
 
- Get Started Button
+Get Started Button
 
- Login Button
+Login Button
 
 Features Section
 
 Display cards
 
- Smart Room Allocation
+Smart Room Allocation
 
- Roommate Matchmaking
+Roommate Matchmaking
 
- Complaint Management
+Complaint Management
 
- Attendance
+Attendance
 
- Notifications
+Notifications
 
- Admin Dashboard
+Admin Dashboard
 
 Statistics Section
 
 Show
 
- Students Registered
+Students Registered
 
- Hostel Rooms
+Hostel Rooms
 
- Boys Hostel
+Boys Hostel
 
- Girls Hostel
+Girls Hostel
 
 Testimonials Section
 
@@ -114,31 +114,31 @@ Footer
 
 Include
 
- About
+About
 
- Contact
+Contact
 
- Privacy
+Privacy
 
- Terms
+Terms
 
- Social Media Icons
+Social Media Icons
 
 2. Login Page
 
 Role Selection
 
- Student
+Student
 
- Warden
+Warden
 
- Admin
+Admin
 
 Fields
 
- Register Number
+Register Number
 
- Password
+Password
 
 Remember Me
 
@@ -156,21 +156,21 @@ Fields
 
 Student Information
 
- Name
+Name
 
- Register Number
+Register Number
 
- Department
+Department
 
- Year
+Year
 
- Gender
+Gender
 
- Email
+Email
 
- Mobile Number
+Mobile Number
 
- Hostel Preference
+Hostel Preference
 
 Create Password
 
@@ -202,17 +202,17 @@ Recent Activity
 
 Shortcut Cards
 
- Apply Hostel
+Apply Hostel
 
- Find Roommate
+Find Roommate
 
- Complaints
+Complaints
 
- Attendance
+Attendance
 
- Room Details
+Room Details
 
- Payment
+Payment
 
 Charts
 
@@ -226,37 +226,37 @@ Application Form
 
 Fields
 
- Name
+Name
 
- Register Number
+Register Number
 
- Department
+Department
 
- Year
+Year
 
- Gender
+Gender
 
- Address
+Address
 
- Parent Details
+Parent Details
 
- Medical Condition
+Medical Condition
 
- Hostel Preference
+Hostel Preference
 
- Room Preference
+Room Preference
 
- Required Facilities
+Required Facilities
 
 Upload
 
- Aadhaar
+Aadhaar
 
- Community Certificate
+Community Certificate
 
- Income Certificate
+Income Certificate
 
- Passport Photo
+Passport Photo
 
 Submit
 
@@ -268,17 +268,17 @@ Display Cards
 
 Each hostel card shows
 
- Hostel Name
+Hostel Name
 
- Boys/Girls
+Boys/Girls
 
- Floors
+Floors
 
- Available Rooms
+Available Rooms
 
- Occupied Rooms
+Occupied Rooms
 
- Total Capacity
+Total Capacity
 
 Search Hostel
 
@@ -318,11 +318,11 @@ Questions
 
 Sleep Time
 
- Before 10 PM
+Before 10 PM
 
- 10–12 PM
+10–12 PM
 
- After Midnight
+After Midnight
 
 Wake-up Time
 
@@ -394,15 +394,15 @@ Show Best Matches
 
 Student Card
 
- Photo
+Photo
 
- Name
+Name
 
- Department
+Department
 
- Compatibility
+Compatibility
 
- Interests
+Interests
 
 Buttons
 
@@ -786,21 +786,21 @@ Dummy Data
 
 Generate at least
 
- 500 Students
+500 Students
 
- 10 Hostels
+10 Hostels
 
- 250 Rooms
+250 Rooms
 
- 100 Complaints
+100 Complaints
 
- 100 Roommate Matches
+100 Roommate Matches
 
- 100 Notifications
+100 Notifications
 
- 200 Attendance Records
+200 Attendance Records
 
- 200 Payment Records
+200 Payment Records
 
 Use realistic Indian student names and BIT departments.
 
