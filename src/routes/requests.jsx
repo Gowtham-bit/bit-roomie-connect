@@ -3,7 +3,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { matches } from "@/lib/mock-data";
+import { useRoommateMatches, useSendRoommateRequest, useCurrentUser } from "@/hooks/use-hostel-api";
+
 export const Route = createFileRoute("/requests")({
   head: () => ({
     meta: [
@@ -21,64 +22,116 @@ export const Route = createFileRoute("/requests")({
   }),
   component: Page,
 });
+
 function Page() {
-  const incoming = matches.slice(0, 4);
-  const outgoing = matches.slice(4, 8);
+  const { data: user } = useCurrentUser();
+  const currentStudent = user || {};
+
+  const { data: matchesData = [] } = useRoommateMatches({ regNo: currentStudent.regNo });
+  const sendMutation = useSendRoommateRequest();
+
+  const matchesList = Array.isArray(matchesData) ? matchesData : [];
+
+  const incoming = matchesList.filter((m) => m.status === "Requested" || m.status === "Pending").slice(0, 4);
+  const outgoing = matchesList.filter((m) => m.status === "Accepted").slice(0, 4);
+  const suggested = matchesList.filter((m) => m.status === "Suggested" || !m.status).slice(0, 4);
+
+  const handleAction = (targetRegNo, targetName, status) => {
+    sendMutation.mutate(
+      {
+        requesterRegNo: currentStudent.regNo || "7376242AD142",
+        targetRegNo,
+        status,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Request ${status}`, {
+            description: `Roommate request status for ${targetName} updated in MongoDB.`,
+          });
+        },
+      },
+    );
+  };
+
   return (
     <AppShell title="Roommate requests" breadcrumb={["Requests"]}>
       <div className="grid gap-5 lg:grid-cols-2">
-        {[
-          ["Incoming requests", incoming, true],
-          ["Outgoing requests", outgoing, false],
-        ].map(([label, list, inc]) => (
-          <section key={label} className="rounded-2xl border bg-card p-5 shadow-soft">
-            <h2 className="text-lg font-bold">{label}</h2>
-            <ul className="mt-4 space-y-3">
-              {list.map((m) => (
+        <section className="rounded-2xl border bg-card p-5 shadow-soft">
+          <h2 className="text-lg font-bold">Incoming & Active Requests</h2>
+          <ul className="mt-4 space-y-3">
+            {(incoming.length > 0 ? incoming : suggested).map((m) => (
+              <li
+                key={m.matchId || m.regNo}
+                className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
+              >
+                <img src={m.avatar || "https://i.pravatar.cc/160?img=1"} alt="" className="size-11 rounded-xl object-cover" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{m.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {m.dept || m.department} · Year {m.year}
+                  </p>
+                </div>
+                <Badge variant="secondary">{m.compatibility || 85}%</Badge>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="success"
+                    disabled={sendMutation.isPending}
+                    onClick={() => handleAction(m.regNo, m.name, "Accepted")}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={sendMutation.isPending}
+                    onClick={() => handleAction(m.regNo, m.name, "Rejected")}
+                  >
+                    Reject
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-2xl border bg-card p-5 shadow-soft">
+          <h2 className="text-lg font-bold">Accepted & Connected Matches</h2>
+          <ul className="mt-4 space-y-3">
+            {outgoing.length > 0 ? (
+              outgoing.map((m) => (
                 <li
-                  key={m.matchId}
+                  key={m.matchId || m.regNo}
                   className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
                 >
-                  <img src={m.avatar} alt="" className="size-11 rounded-xl object-cover" />
+                  <img src={m.avatar || "https://i.pravatar.cc/160?img=2"} alt="" className="size-11 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{m.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.dept} · Year {m.year}
+                      {m.dept || m.department} · Year {m.year}
                     </p>
                   </div>
-                  <Badge variant="secondary">{m.compatibility}%</Badge>
-                  {inc ? (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="success"
-                        onClick={() => toast.success(`Accepted ${m.name}`)}
-                      >
-                        Accept
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => toast("Request rejected")}>
-                        Reject
-                      </Button>
-                    </div>
-                  ) : (
-                    <Badge variant="outline">Awaiting reply</Badge>
-                  )}
+                  <Badge variant="default">Accepted</Badge>
                   <Button
                     size="sm"
                     variant="soft"
                     onClick={() =>
-                      toast("Chat opened", {
-                        description: "Messaging is available after both students accept.",
+                      toast("Chat session started", {
+                        description: `Direct message channel opened with ${m.name}.`,
                       })
                     }
                   >
                     Chat
                   </Button>
                 </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+              ))
+            ) : (
+              <div className="p-8 text-center text-sm text-muted-foreground">
+                No accepted roommate requests yet. Send requests from the Find Roommate matchmaking page!
+              </div>
+            )}
+          </ul>
+        </section>
       </div>
     </AppShell>
   );

@@ -32,9 +32,9 @@ export const Route = createFileRoute("/login")({
 });
 
 const roles = [
-  { key: "student", label: "Student", icon: GraduationCap, hint: "Register number" },
-  { key: "warden", label: "Warden", icon: Shield, hint: "Staff ID" },
-  { key: "admin", label: "Admin", icon: UserCog, hint: "Admin ID" },
+  { key: "student", label: "Student", icon: GraduationCap, hint: "Register number", placeholder: "7376242AD142" },
+  { key: "warden", label: "Warden", icon: Shield, hint: "Warden ID (Boys: warden123 | Girls: gwarden123)", placeholder: "warden123 or gwarden123" },
+  { key: "admin", label: "Admin", icon: UserCog, hint: "Admin ID (admin123)", placeholder: "admin123" },
 ];
 
 function LoginPage() {
@@ -50,14 +50,15 @@ function LoginPage() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const result = await apiLogin(data.regNo, data.password, role);
-      if (result.error) {
+      if (result && result.error) {
         toast.error("Authentication Failed", { description: result.error });
         return;
       }
-      toast.success(`Signed in as ${role}`, {
+      const activeRole = result?.role || role;
+      toast.success(`Signed in as ${activeRole.toUpperCase()}`, {
         description: `Welcome back ${result.user?.name || ""}!`,
       });
-      navigate({ to: role === "admin" ? "/admin" : role === "warden" ? "/warden" : "/dashboard" });
+      navigate({ to: activeRole === "admin" ? "/admin" : activeRole === "warden" ? "/warden" : "/dashboard" });
     } catch (err) {
       toast.error("Sign In Error", {
         description: err.message || "Account not found or password incorrect.",
@@ -118,28 +119,28 @@ function LoginPage() {
             <Label htmlFor="regNo">{active.hint}</Label>
             <Input
               id="regNo"
-              placeholder={role === "student" ? "7376242AD142" : "BIT-STAFF-1042"}
+              placeholder={active.placeholder}
               aria-invalid={!!errors.regNo}
               {...register("regNo", {
                 required: "This field is required",
-                minLength: { value: 6, message: "Enter at least 6 characters" },
+                minLength: { value: 4, message: "Enter at least 4 characters" },
               })}
             />
             {errors.regNo && <p className="text-xs text-destructive">{errors.regNo.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password {role === "warden" ? "(warden)" : role === "admin" ? "(admin)" : ""}</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={show ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={role === "warden" ? "warden" : role === "admin" ? "admin" : "••••••••"}
                 className="pr-11"
                 aria-invalid={!!errors.password}
                 {...register("password", {
                   required: "Password is required",
-                  minLength: { value: 6, message: "Minimum 6 characters" },
+                  minLength: { value: 4, message: "Minimum 4 characters" },
                 })}
               />
               <button

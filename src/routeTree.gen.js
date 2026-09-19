@@ -6,6 +6,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as AdminRouteImport } from "./routes/admin";
 import { Route as ApplyRouteImport } from "./routes/apply";
 import { Route as AttendanceRouteImport } from "./routes/attendance";
 import { Route as ComplaintsRouteImport } from "./routes/complaints";
@@ -18,11 +19,18 @@ import { Route as RegisterRouteImport } from "./routes/register";
 import { Route as RequestsRouteImport } from "./routes/requests";
 import { Route as RoomChangeRouteImport } from "./routes/room-change";
 import { Route as RoommatesRouteImport } from "./routes/roommates";
+import { Route as WardenRouteImport } from "./routes/warden";
 import { Route as HostelsIndexRouteImport } from "./routes/hostels.index";
 import { Route as HostelsHostelIdRouteImport } from "./routes/hostels.$hostelId";
+
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+});
+const AdminRoute = AdminRouteImport.update({
+  id: "/admin",
+  path: "/admin",
   getParentRoute: () => rootRouteImport,
 });
 const ApplyRoute = ApplyRouteImport.update({
@@ -85,6 +93,11 @@ const RoommatesRoute = RoommatesRouteImport.update({
   path: "/roommates",
   getParentRoute: () => rootRouteImport,
 });
+const WardenRoute = WardenRouteImport.update({
+  id: "/warden",
+  path: "/warden",
+  getParentRoute: () => rootRouteImport,
+});
 const HostelsIndexRoute = HostelsIndexRouteImport.update({
   id: "/hostels/",
   path: "/hostels/",
@@ -95,8 +108,10 @@ const HostelsHostelIdRoute = HostelsHostelIdRouteImport.update({
   path: "/hostels/$hostelId",
   getParentRoute: () => rootRouteImport,
 });
+
 const rootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ApplyRoute: ApplyRoute,
   AttendanceRoute: AttendanceRoute,
   ComplaintsRoute: ComplaintsRoute,
@@ -109,6 +124,7 @@ const rootRouteChildren = {
   RequestsRoute: RequestsRoute,
   RoomChangeRoute: RoomChangeRoute,
   RoommatesRoute: RoommatesRoute,
+  WardenRoute: WardenRoute,
   HostelsHostelIdRoute: HostelsHostelIdRoute,
   HostelsIndexRoute: HostelsIndexRoute,
 };

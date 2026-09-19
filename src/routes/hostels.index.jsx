@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useHostels } from "@/hooks/use-hostel-api";
+import { useHostels, useCurrentUser } from "@/hooks/use-hostel-api";
 
 export const Route = createFileRoute("/hostels/")({
   head: () => ({
@@ -29,14 +29,20 @@ export const Route = createFileRoute("/hostels/")({
 });
 
 function HostelsPage() {
+  const { data: user } = useCurrentUser();
+  const student = user || {};
+  const isFemale = student.gender?.toLowerCase() === "female";
+  const defaultType = isFemale ? "Girls" : "Boys";
+
   const [q, setQ] = useState("");
-  const [type, setType] = useState("All");
+  const [type, setType] = useState(defaultType);
   const [sort, setSort] = useState("availability");
 
   const { data: hostelsData = [] } = useHostels(type, q);
 
   const list = useMemo(() => {
     let l = Array.isArray(hostelsData) ? hostelsData : [];
+    l = l.filter((h) => h.type === defaultType);
     l = [...l].sort((a, b) =>
       sort === "availability"
         ? b.capacity - b.occupied - (a.capacity - a.occupied)
@@ -45,7 +51,7 @@ function HostelsPage() {
           : a.name.localeCompare(b.name),
     );
     return l;
-  }, [hostelsData, sort]);
+  }, [hostelsData, sort, defaultType]);
   return (
     <AppShell
       title="Hostel availability"

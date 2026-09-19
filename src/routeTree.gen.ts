@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as ComplaintsRouteImport } from './routes/complaints'
@@ -22,12 +23,18 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as RoomChangeRouteImport } from './routes/room-change'
 import { Route as RoommatesRouteImport } from './routes/roommates'
+import { Route as WardenRouteImport } from './routes/warden'
 import { Route as HostelsIndexRouteImport } from './routes/hostels.index'
 import { Route as HostelsHostelIdRouteImport } from './routes/hostels.$hostelId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplyRoute = ApplyRouteImport.update({
@@ -90,6 +97,11 @@ const RoommatesRoute = RoommatesRouteImport.update({
   path: '/roommates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WardenRoute = WardenRouteImport.update({
+  id: '/warden',
+  path: '/warden',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostelsIndexRoute = HostelsIndexRouteImport.update({
   id: '/hostels/',
   path: '/hostels/',
@@ -103,6 +115,7 @@ const HostelsHostelIdRoute = HostelsHostelIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -115,11 +128,13 @@ export interface FileRoutesByFullPath {
   '/requests': typeof RequestsRoute
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
+  '/warden': typeof WardenRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -132,12 +147,14 @@ export interface FileRoutesByTo {
   '/requests': typeof RequestsRoute
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
+  '/warden': typeof WardenRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels': typeof HostelsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -150,6 +167,7 @@ export interface FileRoutesById {
   '/requests': typeof RequestsRoute
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
+  '/warden': typeof WardenRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
@@ -157,6 +175,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/apply'
     | '/attendance'
     | '/complaints'
@@ -169,11 +188,13 @@ export interface FileRouteTypes {
     | '/requests'
     | '/room-change'
     | '/roommates'
+    | '/warden'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/apply'
     | '/attendance'
     | '/complaints'
@@ -186,11 +207,13 @@ export interface FileRouteTypes {
     | '/requests'
     | '/room-change'
     | '/roommates'
+    | '/warden'
     | '/hostels/$hostelId'
     | '/hostels'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/apply'
     | '/attendance'
     | '/complaints'
@@ -203,12 +226,14 @@ export interface FileRouteTypes {
     | '/requests'
     | '/room-change'
     | '/roommates'
+    | '/warden'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ApplyRoute: typeof ApplyRoute
   AttendanceRoute: typeof AttendanceRoute
   ComplaintsRoute: typeof ComplaintsRoute
@@ -221,6 +246,7 @@ export interface RootRouteChildren {
   RequestsRoute: typeof RequestsRoute
   RoomChangeRoute: typeof RoomChangeRoute
   RoommatesRoute: typeof RoommatesRoute
+  WardenRoute: typeof WardenRoute
   HostelsHostelIdRoute: typeof HostelsHostelIdRoute
   HostelsIndexRoute: typeof HostelsIndexRoute
 }
@@ -232,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/apply': {
@@ -318,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoommatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/warden': {
+      id: '/warden'
+      path: '/warden'
+      fullPath: '/warden'
+      preLoaderRoute: typeof WardenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hostels/': {
       id: '/hostels/'
       path: '/hostels'
@@ -337,6 +377,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ApplyRoute: ApplyRoute,
   AttendanceRoute: AttendanceRoute,
   ComplaintsRoute: ComplaintsRoute,
@@ -349,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequestsRoute: RequestsRoute,
   RoomChangeRoute: RoomChangeRoute,
   RoommatesRoute: RoommatesRoute,
+  WardenRoute: WardenRoute,
   HostelsHostelIdRoute: HostelsHostelIdRoute,
   HostelsIndexRoute: HostelsIndexRoute,
 }

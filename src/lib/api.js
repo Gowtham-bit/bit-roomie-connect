@@ -88,6 +88,57 @@ export async function apiLogin(regNo, password, role) {
   if (result && result.token) {
     setToken(result.token);
     if (result.user) setCurrentUser(result.user);
+    return result;
+  }
+
+  // Fallback for Warden credentials
+  if (role === "warden" || regNo === "warden123" || regNo === "gwarden123") {
+    if (regNo === "warden123" && password === "warden") {
+      const wardenUser = {
+        id: "W001",
+        regNo: "warden123",
+        name: "Boys Hostel Warden",
+        email: "boyswarden@bitsathy.ac.in",
+        role: "warden",
+        wardenType: "Boys",
+        department: "Boys Hostel Administration",
+      };
+      setToken("mock_warden_token_123");
+      setCurrentUser(wardenUser);
+      return { token: "mock_warden_token_123", user: wardenUser, role: "warden" };
+    } else if (regNo === "gwarden123" && (password === "warden" || password === "gwarden")) {
+      const wardenUser = {
+        id: "W002",
+        regNo: "gwarden123",
+        name: "Girls Hostel Warden",
+        email: "girlswarden@bitsathy.ac.in",
+        role: "warden",
+        wardenType: "Girls",
+        department: "Girls Hostel Administration",
+      };
+      setToken("mock_gwarden_token_123");
+      setCurrentUser(wardenUser);
+      return { token: "mock_gwarden_token_123", user: wardenUser, role: "warden" };
+    }
+    return { error: "Invalid Warden credentials. Boys Warden: warden123 | Girls Warden: gwarden123" };
+  }
+
+  // Fallback for Admin credentials
+  if (role === "admin" || regNo === "admin123") {
+    if (regNo === "admin123" && password === "admin") {
+      const adminUser = {
+        id: "A001",
+        regNo: "admin123",
+        name: "System Administrator",
+        email: "admin@bitsathy.ac.in",
+        role: "admin",
+        department: "IT & Operations",
+      };
+      setToken("mock_admin_token_123");
+      setCurrentUser(adminUser);
+      return { token: "mock_admin_token_123", user: adminUser, role: "admin" };
+    }
+    return { error: "Invalid credentials for Admin. Use ID: admin123 & password: admin" };
   }
 
   return result;
@@ -109,7 +160,20 @@ export async function apiRegister(studentData) {
 
 export async function apiGetMe() {
   const data = await request("/auth/me");
-  return data || mockCurrentStudent;
+  if (data && !data.error) return data;
+  return getCurrentUser();
+}
+
+export async function apiUpdateProfile(payload) {
+  const res = await request("/auth/profile", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  if (res && !res.error) {
+    setCurrentUser(res);
+    return res;
+  }
+  return res;
 }
 
 // HOSTELS API
@@ -119,7 +183,7 @@ export async function apiGetHostels(type = "All", search = "") {
   if (search) params.append("search", search);
 
   const data = await request(`/hostels?${params.toString()}`);
-  if (data) return data;
+  if (data && !data.error) return data;
 
   // Fallback mock filtering
   return mockHostels.filter(
@@ -130,18 +194,66 @@ export async function apiGetHostels(type = "All", search = "") {
 
 export async function apiGetHostelById(id) {
   const data = await request(`/hostels/${id}`);
-  if (data) return data;
+  if (data && !data.error) return data;
 
   const hostel = mockHostels.find((h) => h.id === id);
   const rooms = mockRooms.filter((r) => r.hostelId === id);
   return { hostel, rooms };
 }
 
+// APPLICATIONS API
+export async function apiSubmitApplication(payload) {
+  const res = await request("/applications/apply", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res;
+}
+
+export async function apiSubmitRoomChange(payload) {
+  const res = await request("/applications/room-change", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res;
+}
+
+export async function apiGetApplications(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const data = await request(`/applications?${query}`);
+  if (data && !data.error) return data;
+  return [];
+}
+
+export async function apiGetRoomChangeRequests(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const data = await request(`/applications/room-change?${query}`);
+  if (data && !data.error) return data;
+  return [];
+}
+
+export async function apiUpdateApplicationStatus(id, status) {
+  const res = await request(`/applications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  return res;
+}
+
+export async function apiUpdateRoomChangeStatus(id, status) {
+  const res = await request(`/applications/room-change/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  return res;
+}
+
 // ROOMMATES API
 export async function apiGetRoommateMatches(params = {}) {
   const query = new URLSearchParams(params).toString();
   const data = await request(`/roommates/matches?${query}`);
-  return data || mockMatches;
+  if (data && !data.error) return data;
+  return mockMatches;
 }
 
 export async function apiSendRoommateRequest(payload) {
@@ -156,7 +268,8 @@ export async function apiSendRoommateRequest(payload) {
 export async function apiGetComplaints(params = {}) {
   const query = new URLSearchParams(params).toString();
   const data = await request(`/complaints?${query}`);
-  return data || mockComplaints;
+  if (data && !data.error) return data;
+  return mockComplaints;
 }
 
 export async function apiCreateComplaint(payload) {
@@ -171,26 +284,37 @@ export async function apiCreateComplaint(payload) {
 export async function apiGetPayments(params = {}) {
   const query = new URLSearchParams(params).toString();
   const data = await request(`/payments?${query}`);
-  return data || mockPayments;
+  if (data && !data.error) return data;
+  return mockPayments;
 }
 
 // ATTENDANCE API
 export async function apiGetAttendance(params = {}) {
   const query = new URLSearchParams(params).toString();
   const data = await request(`/attendance?${query}`);
-  return data || mockAttendance;
+  if (data && !data.error) return data;
+  return mockAttendance;
+}
+
+export async function apiMarkAttendance(payload) {
+  const res = await request("/attendance", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res;
 }
 
 // NOTIFICATIONS API
 export async function apiGetNotifications(params = {}) {
   const query = new URLSearchParams(params).toString();
   const data = await request(`/notifications?${query}`);
-  return data || mockNotifications;
+  if (data && !data.error) return data;
+  return mockNotifications;
 }
 
 // DASHBOARD STATS API
 export async function apiGetStats() {
   const data = await request("/stats");
-  if (data) return data;
+  if (data && !data.error) return data;
   return { stats: mockStats, occupancyByHostel: mockOccupancy };
 }

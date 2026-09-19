@@ -8,9 +8,17 @@ import {
   apiCreateComplaint,
   apiGetPayments,
   apiGetAttendance,
+  apiMarkAttendance,
   apiGetNotifications,
   apiGetStats,
   apiGetMe,
+  apiUpdateProfile,
+  apiSubmitApplication,
+  apiSubmitRoomChange,
+  apiGetApplications,
+  apiGetRoomChangeRequests,
+  apiUpdateApplicationStatus,
+  apiUpdateRoomChangeStatus,
   getCurrentUser,
 } from "../lib/api";
 
@@ -21,6 +29,16 @@ export function useCurrentUser() {
       const me = await apiGetMe();
       if (me && !me.error) return me;
       return getCurrentUser();
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiUpdateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
 }
@@ -38,6 +56,60 @@ export function useHostelDetails(id) {
     queryKey: ["hostel", id],
     queryFn: () => apiGetHostelById(id),
     enabled: !!id,
+  });
+}
+
+export function useApplications(params = {}) {
+  return useQuery({
+    queryKey: ["applications", params],
+    queryFn: () => apiGetApplications(params),
+  });
+}
+
+export function useSubmitApplication() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiSubmitApplication,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+    },
+  });
+}
+
+export function useUpdateApplicationStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }) => apiUpdateApplicationStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+    },
+  });
+}
+
+export function useRoomChangeRequests(params = {}) {
+  return useQuery({
+    queryKey: ["room-changes", params],
+    queryFn: () => apiGetRoomChangeRequests(params),
+  });
+}
+
+export function useSubmitRoomChange() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiSubmitRoomChange,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["room-changes"] });
+    },
+  });
+}
+
+export function useUpdateRoomChangeStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }) => apiUpdateRoomChangeStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["room-changes"] });
+    },
   });
 }
 
@@ -66,6 +138,16 @@ export function useAttendance(params = {}) {
   return useQuery({
     queryKey: ["attendance", params],
     queryFn: () => apiGetAttendance(params),
+  });
+}
+
+export function useMarkAttendance() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiMarkAttendance,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendance"] });
+    },
   });
 }
 
