@@ -39,7 +39,10 @@ function Page() {
   const submitRoomChangeMutation = useSubmitRoomChange();
 
   const student = user || {};
-  const isFemale = student.gender?.toLowerCase() === "female";
+  const isFemale =
+    student.wardenType === "Girls" ||
+    student.regNo === "gwarden123" ||
+    student.gender?.toLowerCase() === "female";
   const requiredType = isFemale ? "Girls" : "Boys";
   const rawHostels = Array.isArray(hostelsData) ? hostelsData : [];
   const hostelsList = rawHostels.filter((h) => h.type === requiredType);
@@ -137,20 +140,69 @@ function Page() {
         <section className="rounded-2xl border bg-card p-6 shadow-soft">
           <h2 className="text-sm font-bold">Request status tracker</h2>
           {latestRequest ? (
-            <div className="mt-4 rounded-xl bg-muted/50 p-4 space-y-2">
+            <div className="mt-4 rounded-xl bg-muted/50 p-4 space-y-2 border">
               <p className="text-xs font-bold text-primary">Latest Request: #{latestRequest.id}</p>
               <p className="text-sm font-medium">Target: {latestRequest.targetHostel}</p>
               <p className="text-xs text-muted-foreground">Reason: {latestRequest.reason}</p>
-              <p className="text-xs font-semibold">Status: <span className="text-primary">{latestRequest.status}</span></p>
+              <p className="text-xs font-semibold">
+                Current Status:{" "}
+                <span className={`font-bold ${
+                  latestRequest.status === "Approved by Warden"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : latestRequest.status === "Room Allotted" || latestRequest.status === "Approved"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : latestRequest.status.includes("Rejected")
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-amber-600 dark:text-amber-400"
+                }`}>
+                  {latestRequest.status === "Approved by Warden"
+                    ? "Approved by Warden (Awaiting Admin Room Allotment)"
+                    : latestRequest.status === "Room Allotted" || latestRequest.status === "Approved"
+                    ? `Room ${latestRequest.allottedRoom || "204"} Allotted in ${latestRequest.targetHostel}`
+                    : latestRequest.status}
+                </span>
+              </p>
             </div>
           ) : null}
 
           <ol className="mt-5 space-y-6 border-l pl-5">
             {[
-              ["Submitted", latestRequest ? latestRequest.appliedDate : "No active request", !!latestRequest],
-              ["Warden review", latestRequest?.status === "In Review" || latestRequest?.status === "Approved" ? "Under Review" : "Pending", latestRequest?.status === "In Review" || latestRequest?.status === "Approved"],
-              ["Admin approval", latestRequest?.status === "Approved" ? "Approved" : "Pending", latestRequest?.status === "Approved"],
-              ["Room allotted", latestRequest?.status === "Approved" ? "Completed" : "Pending", latestRequest?.status === "Approved"],
+              [
+                "Submitted",
+                latestRequest ? `Submitted on ${latestRequest.appliedDate}` : "No active request",
+                !!latestRequest,
+              ],
+              [
+                "Warden review",
+                latestRequest?.status === "Approved by Warden" ||
+                latestRequest?.status === "Approved" ||
+                latestRequest?.status === "Room Allotted"
+                  ? "Warden Approved & Forwarded to Admin"
+                  : latestRequest?.status === "Pending Warden Review" || latestRequest?.status === "Pending"
+                    ? "Under Review by Warden"
+                    : latestRequest?.status.includes("Rejected")
+                    ? "Rejected"
+                    : "Pending Warden Review",
+                !!latestRequest && !latestRequest.status.includes("Rejected"),
+              ],
+              [
+                "Admin approval",
+                latestRequest?.status === "Approved" || latestRequest?.status === "Room Allotted"
+                  ? "Approved by System Admin"
+                  : latestRequest?.status === "Approved by Warden"
+                    ? "Awaiting Admin Room Allotment"
+                    : "Pending Admin Review",
+                latestRequest?.status === "Approved by Warden" ||
+                latestRequest?.status === "Approved" ||
+                latestRequest?.status === "Room Allotted",
+              ],
+              [
+                "Room allotted",
+                latestRequest?.status === "Approved" || latestRequest?.status === "Room Allotted"
+                  ? `Room ${latestRequest.allottedRoom || "204"} Allotted in ${latestRequest.targetHostel}`
+                  : "Pending Allotment",
+                latestRequest?.status === "Approved" || latestRequest?.status === "Room Allotted",
+              ],
             ].map(([s, d, active]) => (
               <li key={s} className="relative">
                 <span

@@ -34,7 +34,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { currentStudent, notifications } from "@/lib/mock-data";
+import { currentStudent as fallbackStudent, notifications } from "@/lib/mock-data";
+import { useCurrentUser } from "@/hooks/use-hostel-api";
 import { cn } from "@/lib/utils";
 const studentNav = [
   {
@@ -106,7 +107,33 @@ const wardenNav = [
 export function AppShell({ role = "student", title, breadcrumb, actions, children }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const nav = role === "admin" ? adminNav : role === "warden" ? wardenNav : studentNav;
+
+  const { data: user } = useCurrentUser();
+  const currentUser = user || fallbackStudent;
+
+  const activeRole = currentUser.role || (
+    currentUser.regNo === "admin123"
+      ? "admin"
+      : currentUser.regNo === "warden123" || currentUser.regNo === "gwarden123"
+        ? "warden"
+        : role
+  );
+
+  const isGirlsWarden = currentUser.wardenType === "Girls" || currentUser.regNo === "gwarden123";
+  const avatarUrl =
+    currentUser.avatar ||
+    (activeRole === "admin"
+      ? "https://i.pravatar.cc/160?img=60"
+      : isGirlsWarden
+        ? "https://i.pravatar.cc/160?img=47"
+        : activeRole === "warden"
+          ? "https://i.pravatar.cc/160?img=68"
+          : "https://i.pravatar.cc/160?img=12");
+
+  const displayName = currentUser.name || "User";
+  const displaySubtext = currentUser.regNo || currentUser.email || "";
+
+  const nav = activeRole === "admin" ? adminNav : activeRole === "warden" ? wardenNav : studentNav;
   const unread = notifications.filter((n) => !n.read).length;
   const sidebar = (
     <div className="flex h-full flex-col">
@@ -119,7 +146,7 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
         <span className="font-display text-sm leading-tight font-extrabold">
           BIT Hostel
           <span className="block text-[11px] font-medium text-muted-foreground capitalize">
-            {role} portal
+            {activeRole} portal
           </span>
         </span>
       </Link>
@@ -163,12 +190,23 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
 
       <div className="border-t p-3">
         <div className="flex items-center gap-3 rounded-xl p-2">
-          <img src={currentStudent.avatar} alt="" className="size-9 rounded-full object-cover" />
+          <img src={avatarUrl} alt="" className="size-9 rounded-full object-cover" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{currentStudent.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{currentStudent.regNo}</p>
+            <p className="truncate text-sm font-semibold">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">{displaySubtext}</p>
           </div>
-          <Button asChild variant="ghost" size="icon" aria-label="Sign out">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            aria-label="Sign out"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("bit_auth_token");
+                localStorage.removeItem("bit_user");
+              }
+            }}
+          >
             <Link to="/login">
               <LogOut className="size-4" />
             </Link>
@@ -261,17 +299,17 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
                     className="ml-1 flex items-center gap-2 rounded-full border p-1 pr-3 transition-colors hover:bg-muted"
                     aria-label="Account menu"
                   >
-                    <img src={currentStudent.avatar} alt="" className="size-7 rounded-full" />
+                    <img src={avatarUrl} alt="" className="size-7 rounded-full object-cover" />
                     <span className="hidden text-sm font-medium sm:block">
-                      {currentStudent.name.split(" ")[0]}
+                      {displayName.split(" ")[0]}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
-                    <p className="text-sm font-semibold">{currentStudent.name}</p>
+                    <p className="text-sm font-semibold">{displayName}</p>
                     <p className="text-xs font-normal text-muted-foreground">
-                      {currentStudent.email}
+                      {currentUser.email || displaySubtext}
                     </p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -286,7 +324,15 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem
+                    asChild
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.removeItem("bit_auth_token");
+                        localStorage.removeItem("bit_user");
+                      }
+                    }}
+                  >
                     <Link to="/login">
                       <LogOut className="mr-2 size-4" /> Sign out
                     </Link>

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   apiGetHostels,
   apiGetHostelById,
+  apiGetRooms,
   apiGetRoommateMatches,
   apiSendRoommateRequest,
   apiGetComplaints,
@@ -59,10 +60,18 @@ export function useHostelDetails(id) {
   });
 }
 
+export function useRooms(params = {}) {
+  return useQuery({
+    queryKey: ["rooms", params],
+    queryFn: () => apiGetRooms(params),
+  });
+}
+
 export function useApplications(params = {}) {
   return useQuery({
     queryKey: ["applications", params],
     queryFn: () => apiGetApplications(params),
+    refetchInterval: 3000,
   });
 }
 
@@ -79,9 +88,10 @@ export function useSubmitApplication() {
 export function useUpdateApplicationStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }) => apiUpdateApplicationStatus(id, status),
+    mutationFn: ({ id, status, allottedRoom }) => apiUpdateApplicationStatus(id, status, allottedRoom),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
 }
@@ -90,6 +100,7 @@ export function useRoomChangeRequests(params = {}) {
   return useQuery({
     queryKey: ["room-changes", params],
     queryFn: () => apiGetRoomChangeRequests(params),
+    refetchInterval: 3000,
   });
 }
 
@@ -106,9 +117,10 @@ export function useSubmitRoomChange() {
 export function useUpdateRoomChangeStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }) => apiUpdateRoomChangeStatus(id, status),
+    mutationFn: ({ id, status, allottedRoom }) => apiUpdateRoomChangeStatus(id, status, allottedRoom),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room-changes"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
 }

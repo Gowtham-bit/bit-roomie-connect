@@ -31,18 +31,37 @@ export const Route = createFileRoute("/hostels/")({
 function HostelsPage() {
   const { data: user } = useCurrentUser();
   const student = user || {};
-  const isFemale = student.gender?.toLowerCase() === "female";
-  const defaultType = isFemale ? "Girls" : "Boys";
+
+  const isAdmin = student.role === "admin" || student.regNo === "admin123";
+  const isGirlsUser =
+    !isAdmin &&
+    (student.wardenType === "Girls" ||
+      student.regNo === "gwarden123" ||
+      student.gender?.toLowerCase() === "female");
+  const isBoysUser =
+    !isAdmin &&
+    !isGirlsUser &&
+    (student.wardenType === "Boys" ||
+      student.regNo === "warden123" ||
+      student.gender?.toLowerCase() === "male" ||
+      true);
+
+  const enforcedType = isAdmin ? null : isGirlsUser ? "Girls" : "Boys";
 
   const [q, setQ] = useState("");
-  const [type, setType] = useState(defaultType);
+  const [type, setType] = useState(enforcedType || "All");
   const [sort, setSort] = useState("availability");
 
-  const { data: hostelsData = [] } = useHostels(type, q);
+  const activeType = enforcedType || type;
+  const { data: hostelsData = [] } = useHostels(activeType, q);
 
   const list = useMemo(() => {
     let l = Array.isArray(hostelsData) ? hostelsData : [];
-    l = l.filter((h) => h.type === defaultType);
+    if (enforcedType) {
+      l = l.filter((h) => h.type === enforcedType);
+    } else if (type && type !== "All") {
+      l = l.filter((h) => h.type === type);
+    }
     l = [...l].sort((a, b) =>
       sort === "availability"
         ? b.capacity - b.occupied - (a.capacity - a.occupied)
@@ -51,7 +70,7 @@ function HostelsPage() {
           : a.name.localeCompare(b.name),
     );
     return l;
-  }, [hostelsData, sort, defaultType]);
+  }, [hostelsData, sort, enforcedType, type]);
   return (
     <AppShell
       title="Hostel availability"
@@ -73,17 +92,23 @@ function HostelsPage() {
             aria-label="Search hostels"
           />
         </div>
-        <div className="flex gap-1 rounded-xl bg-muted p-1">
-          {["All", "Boys", "Girls"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setType(t)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        {isAdmin ? (
+          <div className="flex gap-1 rounded-xl bg-muted p-1">
+            {["All", "Boys", "Girls"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setType(t)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center rounded-xl bg-muted px-3 py-1.5 text-xs font-semibold text-primary">
+            {enforcedType === "Girls" ? "Girls Hostels Only" : "Boys Hostels Only"}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <Filter className="size-4 text-muted-foreground" />
           <select

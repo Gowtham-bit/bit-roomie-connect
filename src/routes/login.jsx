@@ -32,9 +32,9 @@ export const Route = createFileRoute("/login")({
 });
 
 const roles = [
-  { key: "student", label: "Student", icon: GraduationCap, hint: "Register number", placeholder: "7376242AD142" },
-  { key: "warden", label: "Warden", icon: Shield, hint: "Warden ID (Boys: warden123 | Girls: gwarden123)", placeholder: "warden123 or gwarden123" },
-  { key: "admin", label: "Admin", icon: UserCog, hint: "Admin ID (admin123)", placeholder: "admin123" },
+  { key: "student", label: "Student", icon: GraduationCap, labelName: "Register Number", placeholder: "Enter Register Number" },
+  { key: "warden", label: "Warden", icon: Shield, labelName: "Warden ID", placeholder: "Enter Warden ID" },
+  { key: "admin", label: "Admin", icon: UserCog, labelName: "Admin ID", placeholder: "Enter Admin ID" },
 ];
 
 function LoginPage() {
@@ -116,7 +116,7 @@ function LoginPage() {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="regNo">{active.hint}</Label>
+            <Label htmlFor="regNo">{active.labelName}</Label>
             <Input
               id="regNo"
               placeholder={active.placeholder}
@@ -130,12 +130,12 @@ function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password {role === "warden" ? "(warden)" : role === "admin" ? "(admin)" : ""}</Label>
+            <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={show ? "text" : "password"}
-                placeholder={role === "warden" ? "warden" : role === "admin" ? "admin" : "••••••••"}
+                placeholder="••••••••"
                 className="pr-11"
                 aria-invalid={!!errors.password}
                 {...register("password", {

@@ -172,15 +172,15 @@ function WardenDashboard() {
                     <p className="text-xs text-muted-foreground">Date: {a.appliedDate}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={a.status === "Approved" ? "default" : a.status === "Rejected" ? "destructive" : "secondary"}>
-                      {a.status}
+                    <Badge variant={a.status === "Approved" || a.status === "Room Allotted" ? "default" : a.status.includes("Rejected") ? "destructive" : "secondary"}>
+                      {a.status === "Approved by Warden" ? "Warden Approved" : a.status}
                     </Badge>
-                    {a.status === "Pending" && (
+                    {(a.status === "Pending" || a.status === "Pending Warden Review") && (
                       <>
-                        <Button size="sm" variant="success" onClick={() => handleAppStatus(a.id, "Approved")}>
-                          Approve
+                        <Button size="sm" variant="success" onClick={() => handleAppStatus(a.id, "Approved by Warden")}>
+                          Warden Approve
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleAppStatus(a.id, "Rejected")}>
+                        <Button size="sm" variant="outline" onClick={() => handleAppStatus(a.id, "Rejected by Warden")}>
                           Reject
                         </Button>
                       </>
@@ -211,15 +211,15 @@ function WardenDashboard() {
                     <p className="text-xs text-muted-foreground">Reason: {r.reason}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={r.status === "Approved" ? "default" : r.status === "Rejected" ? "destructive" : "secondary"}>
-                      {r.status}
+                    <Badge variant={r.status === "Approved" || r.status === "Room Allotted" ? "default" : r.status.includes("Rejected") ? "destructive" : "secondary"}>
+                      {r.status === "Approved by Warden" ? "Warden Approved" : r.status}
                     </Badge>
-                    {r.status === "Pending" && (
+                    {(r.status === "Pending" || r.status === "Pending Warden Review") && (
                       <>
-                        <Button size="sm" variant="success" onClick={() => handleRcStatus(r.id, "Approved")}>
-                          Approve
+                        <Button size="sm" variant="success" onClick={() => handleRcStatus(r.id, "Approved by Warden")}>
+                          Warden Approve
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleRcStatus(r.id, "Rejected")}>
+                        <Button size="sm" variant="outline" onClick={() => handleRcStatus(r.id, "Rejected by Warden")}>
                           Reject
                         </Button>
                       </>

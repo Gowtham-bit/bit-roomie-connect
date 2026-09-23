@@ -1,69 +1,45 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, StatCard } from "@/components/layout/app-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
-  useDashboardStats,
-  useHostels,
-  useRoomChangeRequests,
-  useUpdateRoomChangeStatus,
   useApplications,
+  useRoomChangeRequests,
   useUpdateApplicationStatus,
+  useUpdateRoomChangeStatus,
 } from "@/hooks/use-hostel-api";
-import { Building2, ClipboardList, Layers, Server, ShieldCheck, Users, Wrench } from "lucide-react";
+import { BedDouble, ClipboardList, Layers, ShieldCheck } from "lucide-react";
 import { RoomFloorPickerModal } from "@/components/admin/room-floor-picker";
-import {
-  BarChart,
-  Bar,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/allocation")({
   head: () => ({
     meta: [
-      { title: "Admin Portal · BIT Hostel Portal" },
+      { title: "Room Allocation Desk · BIT Admin Portal" },
       {
         name: "description",
-        content: "Overview of BIT hostel portal metrics, block capacity, occupancy and administrative operations.",
+        content: "Process hostel applications, room change requests and perform manual room allotments.",
       },
     ],
   }),
-  component: AdminDashboard,
+  component: RoomAllocationPage,
 });
 
-function AdminDashboard() {
-  const { data: statsData } = useDashboardStats();
-  const { data: hostelsData = [] } = useHostels();
-  const { data: roomChangesData = [] } = useRoomChangeRequests();
+function RoomAllocationPage() {
   const { data: applicationsData = [] } = useApplications();
+  const { data: roomChangesData = [] } = useRoomChangeRequests();
 
-  const updateRcMutation = useUpdateRoomChangeStatus();
   const updateAppMutation = useUpdateApplicationStatus();
+  const updateRcMutation = useUpdateRoomChangeStatus();
 
   const [manualAppRooms, setManualAppRooms] = useState({});
   const [manualRcRooms, setManualRcRooms] = useState({});
   const [activePicker, setActivePicker] = useState(null); // { type: 'app' | 'rc', item: Object }
 
-  const stats = statsData?.stats || {
-    students: 1840,
-    rooms: 920,
-    hostels: 13,
-    capacity: 2500,
-    occupied: 1840,
-    complaints: 24,
-  };
-  const occupancyChart = statsData?.occupancyByHostel || [];
-  const hostelsList = Array.isArray(hostelsData) ? hostelsData : [];
-  const roomChangesList = Array.isArray(roomChangesData) ? roomChangesData : [];
   const appsList = Array.isArray(applicationsData) ? applicationsData : [];
+  const roomChangesList = Array.isArray(roomChangesData) ? roomChangesData : [];
 
   const handleConfirmPickerAllotment = (roomNo) => {
     if (!activePicker) return;
@@ -95,41 +71,14 @@ function AdminDashboard() {
     }
   };
 
-  const handleAdminAllotRoom = (id, targetHostel, studentName) => {
-    const roomNo = manualRcRooms[id] || "204";
-    updateRcMutation.mutate(
-      { id, status: "Room Allotted", allottedRoom: roomNo },
-      {
-        onSuccess: () => {
-          toast.success("Room Allotted & Approved", {
-            description: `${studentName} allotted Room ${roomNo} in ${targetHostel}.`,
-          });
-        },
-      },
-    );
-  };
-
-  const handleAdminRejectRc = (id) => {
-    updateRcMutation.mutate(
-      { id, status: "Rejected by Admin" },
-      {
-        onSuccess: () => {
-          toast.error("Request Rejected", {
-            description: `Room change request #${id} has been rejected by Admin.`,
-          });
-        },
-      },
-    );
-  };
-
   const handleAdminApproveApp = (id, hostelName, studentName) => {
     const roomNo = manualAppRooms[id] || "101";
     updateAppMutation.mutate(
       { id, status: "Room Allotted", allottedRoom: roomNo },
       {
         onSuccess: () => {
-          toast.success("Hostel Application Approved", {
-            description: `${studentName} allotted Room ${roomNo} in ${hostelName}.`,
+          toast.success("Hostel Application Approved & Room Allotted", {
+            description: `${studentName} has been manually allotted Room ${roomNo} in ${hostelName}.`,
           });
         },
       },
@@ -142,109 +91,51 @@ function AdminDashboard() {
       {
         onSuccess: () => {
           toast.error("Application Rejected", {
-            description: `Hostel application #${id} has been rejected by Admin.`,
+            description: `Hostel application #${id} has been rejected.`,
           });
         },
       },
     );
   };
 
-  const occupancyRate = Math.round(((stats.occupied || 1840) / (stats.capacity || 2500)) * 100);
+  const handleAdminAllotRoom = (id, targetHostel, studentName) => {
+    const roomNo = manualRcRooms[id] || "204";
+    updateRcMutation.mutate(
+      { id, status: "Room Allotted", allottedRoom: roomNo },
+      {
+        onSuccess: () => {
+          toast.success("Room Change Approved & Allotted", {
+            description: `${studentName}'s room change request approved. Room ${roomNo} allotted in ${targetHostel}.`,
+          });
+        },
+      },
+    );
+  };
+
+  const handleAdminRejectRc = (id) => {
+    updateRcMutation.mutate(
+      { id, status: "Rejected by Admin" },
+      {
+        onSuccess: () => {
+          toast.error("Room Change Rejected", {
+            description: `Room change request #${id} has been rejected.`,
+          });
+        },
+      },
+    );
+  };
 
   return (
-    <AppShell title="BIT Hostel System Administration" breadcrumb={["Admin Dashboard"]}>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Users}
-          title="Total Students Allocated"
-          value={stats.students?.toString() || "1,840"}
-          trend="Registered on portal"
-        />
-        <StatCard
-          icon={Building2}
-          title="Total Hostel Blocks"
-          value={`${stats.hostels || 13} Blocks`}
-          trend={`${stats.boys || 6} Boys / ${stats.girls || 7} Girls`}
-        />
-        <StatCard
-          icon={ShieldCheck}
-          title="Total Capacity / Occupancy"
-          value={`${stats.occupied || 1840} / ${stats.capacity || 2500}`}
-          trend={`${occupancyRate}% Total Occupancy`}
-        />
-        <StatCard
-          icon={Wrench}
-          title="System Maintenance Requests"
-          value={stats.complaints?.toString() || "24"}
-          trend="Tracked in MongoDB"
-        />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
+    <AppShell title="Manual Room Allocation & Approval Desk" breadcrumb={["Admin", "Allocation"]}>
+      <div className="grid gap-6">
+        {/* Hostel Applications Desk */}
         <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold">Hostel Block Occupancy Analytics</h2>
-          <div className="mt-6 h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={occupancyChart.length > 0 ? occupancyChart : [
-                { name: "Sapphire", occupied: 280, vacant: 70 },
-                { name: "Emerald", occupied: 250, vacant: 50 },
-                { name: "Ruby", occupied: 290, vacant: 60 },
-                { name: "Ganga", occupied: 210, vacant: 40 },
-                { name: "Yamuna", occupied: 230, vacant: 50 },
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" stroke="#888888" fontSize={12} />
-                <YAxis stroke="#888888" fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Occupied" />
-                <Bar dataKey="vacant" fill="var(--color-muted-foreground)" radius={[4, 4, 0, 0]} name="Vacant" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <div className="rounded-2xl border bg-card p-6 shadow-soft">
-            <h2 className="text-base font-bold flex items-center gap-2">
-              <Server className="size-5 text-primary" /> Database & System Health
-            </h2>
-            <div className="mt-4 space-y-4 text-sm">
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-muted-foreground">MongoDB Atlas State</span>
-                <Badge variant="default">Connected</Badge>
-              </div>
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-muted-foreground">Backend Express API</span>
-                <Badge variant="default">Running (Port 5000)</Badge>
-              </div>
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-muted-foreground">Overall Capacity Rate</span>
-                <span className="font-bold">{occupancyRate}%</span>
-              </div>
-              <Progress value={occupancyRate} className="mt-2" />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border bg-card p-6 shadow-soft">
-            <h2 className="text-base font-bold mb-3">Hostel Blocks Directory</h2>
-            <div className="space-y-2 max-h-56 overflow-y-auto">
-              {hostelsList.map((h) => (
-                <div key={h.id} className="flex items-center justify-between rounded-lg border p-2 text-xs">
-                  <span className="font-semibold">{h.name}</span>
-                  <Badge variant="outline">{h.type}</Badge>
-                  <span>{h.occupied}/{h.capacity}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Hostel Applications Approval Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft lg:col-span-2">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <ClipboardList className="size-5 text-primary" /> Hostel Applications Admin Approval Desk
+            <ClipboardList className="size-5 text-primary" /> New Student Hostel Applications
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">Review applications approved by Wardens, manually assign room numbers, and complete room allotment.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Review applications approved by Wardens, inspect floor-by-floor availability, manually select rooms, and complete allotment.
+          </p>
           <div className="mt-4 space-y-3">
             {appsList.length > 0 ? (
               appsList.map((a) => (
@@ -252,7 +143,7 @@ function AdminDashboard() {
                   <div>
                     <p className="text-sm font-bold">{a.studentName} ({a.regNo})</p>
                     <p className="text-xs text-muted-foreground">
-                      Requested Block: <span className="font-semibold text-primary">{a.hostelName}</span> · Room: {a.roomType} ({a.sharing} sharing)
+                      Requested Block: <span className="font-semibold text-primary">{a.hostelName}</span> · Room Type: {a.roomType} ({a.sharing} sharing)
                     </p>
                     <p className="text-xs text-muted-foreground">Applied Date: {a.appliedDate}</p>
                   </div>
@@ -305,17 +196,19 @@ function AdminDashboard() {
                 </div>
               ))
             ) : (
-              <p className="py-6 text-center text-sm text-muted-foreground">No hostel applications awaiting admin room allotment.</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">No pending hostel applications awaiting admin room allotment.</p>
             )}
           </div>
         </section>
 
-        {/* Room Change Approvals Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft lg:col-span-2">
+        {/* Room Change Desk */}
+        <section className="rounded-2xl border bg-card p-6 shadow-soft">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <ShieldCheck className="size-5 text-primary" /> Room Change Approvals & Room Allocation Desk
+            <BedDouble className="size-5 text-primary" /> Room Change Requests Desk
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">Review room change requests approved by Wardens, inspect floor availability, manually assign room numbers, and complete allotment.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Review room change requests approved by Wardens, inspect floor availability, assign new room numbers, and complete allotment.
+          </p>
           <div className="mt-4 space-y-3">
             {roomChangesList.length > 0 ? (
               roomChangesList.map((r) => (
@@ -376,7 +269,7 @@ function AdminDashboard() {
                 </div>
               ))
             ) : (
-              <p className="py-6 text-center text-sm text-muted-foreground">No room change requests pending admin room allotment.</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">No pending room change requests awaiting admin room allotment.</p>
             )}
           </div>
         </section>

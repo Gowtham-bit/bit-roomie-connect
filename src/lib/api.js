@@ -201,6 +201,13 @@ export async function apiGetHostelById(id) {
   return { hostel, rooms };
 }
 
+export async function apiGetRooms(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const data = await request(`/rooms?${query}`);
+  if (data && !data.error) return data;
+  return [];
+}
+
 // APPLICATIONS API
 export async function apiSubmitApplication(payload) {
   const res = await request("/applications/apply", {
@@ -232,18 +239,18 @@ export async function apiGetRoomChangeRequests(params = {}) {
   return [];
 }
 
-export async function apiUpdateApplicationStatus(id, status) {
+export async function apiUpdateApplicationStatus(id, status, allottedRoom) {
   const res = await request(`/applications/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, allottedRoom }),
   });
   return res;
 }
 
-export async function apiUpdateRoomChangeStatus(id, status) {
+export async function apiUpdateRoomChangeStatus(id, status, allottedRoom) {
   const res = await request(`/applications/room-change/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, allottedRoom }),
   });
   return res;
 }

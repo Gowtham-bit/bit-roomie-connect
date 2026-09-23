@@ -34,6 +34,8 @@ import {
   useAttendance,
   useNotifications,
   useComplaints,
+  useApplications,
+  useRoomChangeRequests,
 } from "@/hooks/use-hostel-api";
 
 export const Route = createFileRoute("/dashboard")({
@@ -75,6 +77,22 @@ function Dashboard() {
   const { data: attendanceData = [] } = useAttendance({ regNo: student.regNo });
   const { data: notificationData = [] } = useNotifications({ regNo: student.regNo });
   const { data: complaintData = [] } = useComplaints({ regNo: student.regNo });
+  const { data: userApps = [] } = useApplications({ regNo: student.regNo });
+  const { data: userRcs = [] } = useRoomChangeRequests({ regNo: student.regNo });
+
+  const latestApp = Array.isArray(userApps) ? userApps[0] : null;
+  const latestRc = Array.isArray(userRcs) ? userRcs[0] : null;
+
+  const currentHostel = student.hostel || (latestApp?.status === "Room Allotted" || latestApp?.status === "Approved" ? latestApp.hostelName : null);
+  const currentRoom = student.room || (latestApp?.status === "Room Allotted" || latestApp?.status === "Approved" ? (latestApp.allottedRoom || "101") : null) || (latestRc?.status === "Room Allotted" ? (latestRc.allottedRoom || "204") : null);
+
+  const displayStatus = currentHostel
+    ? "Allocated"
+    : latestApp?.status === "Approved by Warden" || latestRc?.status === "Approved by Warden"
+    ? "Warden Approved"
+    : latestApp?.status === "Pending Warden Review" || latestRc?.status === "Pending Warden Review"
+    ? "Under Review"
+    : "Pending";
 
   const presentCount = Array.isArray(attendanceData)
     ? attendanceData.filter((a) => a.status === "Present").length
@@ -108,18 +126,19 @@ function Dashboard() {
             <StatCard
               icon={Home}
               label="Hostel status"
-              value={student.hostel ? "Allocated" : "Pending"}
-              trend={student.hostel ? "Confirmed" : "Not Allocated"}
-              tone={student.hostel ? "accent" : "warning"}
+              value={displayStatus}
+              trend={currentHostel ? `Block: ${currentHostel}` : latestApp?.status === "Approved by Warden" ? "Awaiting Admin Allotment" : "In Progress"}
+              tone={currentHostel ? "accent" : "warning"}
             />
             <StatCard
               icon={BedDouble}
               label="Allocated room"
               value={
-                student.room
-                  ? `${student.hostel ? student.hostel.split(" ")[0] : ""} ${student.room}`
+                currentRoom
+                  ? `Room ${currentRoom}`
                   : "Not Assigned"
               }
+              trend={currentHostel ? currentHostel : "Pending Allotment"}
               tone="primary"
             />
             <StatCard icon={CalendarCheck} label="Attendance" value={`${pct}%`} tone="accent" />
@@ -223,8 +242,8 @@ function Dashboard() {
               </div>
             </div>
             <div className="mt-5 space-y-3 text-sm">
-              <Row label="Hostel" value={student.hostel ?? "Not Allocated"} />
-              <Row label="Room" value={student.room ?? "—"} />
+              <Row label="Hostel" value={currentHostel ?? "Not Allocated"} />
+              <Row label="Room" value={currentRoom ?? "—"} />
               <Row label="Department" value={student.dept || "Engineering"} />
               <Row label="Fee status" value="Term I Paid" />
             </div>

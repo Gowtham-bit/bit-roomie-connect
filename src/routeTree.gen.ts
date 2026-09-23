@@ -24,6 +24,13 @@ import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as RoomChangeRouteImport } from './routes/room-change'
 import { Route as RoommatesRouteImport } from './routes/roommates'
 import { Route as WardenRouteImport } from './routes/warden'
+import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
+import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
+import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
+import { Route as AdminHostelsRouteImport } from './routes/admin.hostels'
+import { Route as AdminMatchingRouteImport } from './routes/admin.matching'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as HostelsIndexRouteImport } from './routes/hostels.index'
 import { Route as HostelsHostelIdRouteImport } from './routes/hostels.$hostelId'
 
@@ -102,6 +109,41 @@ const WardenRoute = WardenRouteImport.update({
   path: '/warden',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAllocationRoute = AdminAllocationRouteImport.update({
+  id: '/allocation',
+  path: '/allocation',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminComplaintsRoute = AdminComplaintsRouteImport.update({
+  id: '/complaints',
+  path: '/complaints',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHostelsRoute = AdminHostelsRouteImport.update({
+  id: '/hostels',
+  path: '/hostels',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMatchingRoute = AdminMatchingRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminRoute,
+} as any)
 const HostelsIndexRoute = HostelsIndexRouteImport.update({
   id: '/hostels/',
   path: '/hostels/',
@@ -115,7 +157,7 @@ const HostelsHostelIdRoute = HostelsHostelIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -129,12 +171,19 @@ export interface FileRoutesByFullPath {
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/warden': typeof WardenRoute
+  '/admin/allocation': typeof AdminAllocationRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/hostels': typeof AdminHostelsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -148,13 +197,20 @@ export interface FileRoutesByTo {
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/warden': typeof WardenRoute
+  '/admin/allocation': typeof AdminAllocationRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/hostels': typeof AdminHostelsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels': typeof HostelsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
   '/complaints': typeof ComplaintsRoute
@@ -168,6 +224,13 @@ export interface FileRoutesById {
   '/room-change': typeof RoomChangeRoute
   '/roommates': typeof RoommatesRoute
   '/warden': typeof WardenRoute
+  '/admin/allocation': typeof AdminAllocationRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/hostels': typeof AdminHostelsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/students': typeof AdminStudentsRoute
   '/hostels/$hostelId': typeof HostelsHostelIdRoute
   '/hostels/': typeof HostelsIndexRoute
 }
@@ -189,6 +252,13 @@ export interface FileRouteTypes {
     | '/room-change'
     | '/roommates'
     | '/warden'
+    | '/admin/allocation'
+    | '/admin/attendance'
+    | '/admin/complaints'
+    | '/admin/hostels'
+    | '/admin/matching'
+    | '/admin/reports'
+    | '/admin/students'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesByTo: FileRoutesByTo
@@ -208,6 +278,13 @@ export interface FileRouteTypes {
     | '/room-change'
     | '/roommates'
     | '/warden'
+    | '/admin/allocation'
+    | '/admin/attendance'
+    | '/admin/complaints'
+    | '/admin/hostels'
+    | '/admin/matching'
+    | '/admin/reports'
+    | '/admin/students'
     | '/hostels/$hostelId'
     | '/hostels'
   id:
@@ -227,13 +304,20 @@ export interface FileRouteTypes {
     | '/room-change'
     | '/roommates'
     | '/warden'
+    | '/admin/allocation'
+    | '/admin/attendance'
+    | '/admin/complaints'
+    | '/admin/hostels'
+    | '/admin/matching'
+    | '/admin/reports'
+    | '/admin/students'
     | '/hostels/$hostelId'
     | '/hostels/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ApplyRoute: typeof ApplyRoute
   AttendanceRoute: typeof AttendanceRoute
   ComplaintsRoute: typeof ComplaintsRoute
@@ -358,6 +442,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WardenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/allocation': {
+      id: '/admin/allocation'
+      path: '/allocation'
+      fullPath: '/admin/allocation'
+      preLoaderRoute: typeof AdminAllocationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/attendance': {
+      id: '/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AdminAttendanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/complaints': {
+      id: '/admin/complaints'
+      path: '/complaints'
+      fullPath: '/admin/complaints'
+      preLoaderRoute: typeof AdminComplaintsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hostels': {
+      id: '/admin/hostels'
+      path: '/hostels'
+      fullPath: '/admin/hostels'
+      preLoaderRoute: typeof AdminHostelsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/matching': {
+      id: '/admin/matching'
+      path: '/matching'
+      fullPath: '/admin/matching'
+      preLoaderRoute: typeof AdminMatchingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/hostels/': {
       id: '/hostels/'
       path: '/hostels'
@@ -375,9 +508,31 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminAllocationRoute: typeof AdminAllocationRoute
+  AdminAttendanceRoute: typeof AdminAttendanceRoute
+  AdminComplaintsRoute: typeof AdminComplaintsRoute
+  AdminHostelsRoute: typeof AdminHostelsRoute
+  AdminMatchingRoute: typeof AdminMatchingRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminStudentsRoute: typeof AdminStudentsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAllocationRoute: AdminAllocationRoute,
+  AdminAttendanceRoute: AdminAttendanceRoute,
+  AdminComplaintsRoute: AdminComplaintsRoute,
+  AdminHostelsRoute: AdminHostelsRoute,
+  AdminMatchingRoute: AdminMatchingRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminStudentsRoute: AdminStudentsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   ApplyRoute: ApplyRoute,
   AttendanceRoute: AttendanceRoute,
   ComplaintsRoute: ComplaintsRoute,
