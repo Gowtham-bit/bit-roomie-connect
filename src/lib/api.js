@@ -173,7 +173,16 @@ export async function apiUpdateProfile(payload) {
     setCurrentUser(res);
     return res;
   }
-  return res;
+  // Fallback: update local storage current user state if backend server is unreachable
+  const current = getCurrentUser() || {};
+  const updated = {
+    ...current,
+    ...payload,
+    traits: payload.traits ? { ...(current.traits || {}), ...payload.traits } : current.traits,
+    guardian: payload.guardian ? { ...(current.guardian || {}), ...payload.guardian } : current.guardian,
+  };
+  setCurrentUser(updated);
+  return updated;
 }
 
 // HOSTELS API

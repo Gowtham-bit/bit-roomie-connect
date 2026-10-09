@@ -6,13 +6,19 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Eye, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   useCurrentUser,
   useHostels,
+  
   useSubmitApplication,
   useApplications,
+  useRoommateMatches,
 } from "@/hooks/use-hostel-api";
+import { CompatibilityModal } from "@/components/compatibility-modal";
+
 
 export const Route = createFileRoute("/apply")({
   head: () => ({
@@ -51,6 +57,7 @@ function Page() {
   const hostelsList = rawHostels.filter((h) => h.type === requiredType);
 
   const { data: userApps = [] } = useApplications({ regNo: student.regNo });
+  const { data: roommateMatches = [] } = useRoommateMatches({ regNo: student.regNo || "7376242AD142" });
   const myApps = Array.isArray(userApps) ? userApps : [];
   const latestApp = myApps[0];
 
@@ -58,6 +65,8 @@ function Page() {
   const [roomType, setRoomType] = useState("Non-AC");
   const [sharing, setSharing] = useState("2");
   const [notes, setNotes] = useState("");
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -165,48 +174,75 @@ function Page() {
           </section>
 
           <section className="rounded-2xl border bg-card p-6 shadow-soft">
-            <h2 className="text-lg font-bold">Preferences</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Hostel preference ({requiredType} Hostels Only)</Label>
-                <select
-                  value={selectedHostel}
-                  onChange={(e) => setSelectedHostel(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm"
-                >
-                  <option value="">Select {requiredType} Hostel Block</option>
-                  {hostelsList.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.name} ({h.type} Hostel)
-                    </option>
-                  ))}
-                </select>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Sparkles className="size-5 text-primary" /> Roommate Compatibility Profile
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Your lifestyle answers are saved and displayed to potential room partners for hostel allocation matching.
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label>Room type & sharing</Label>
-                <select
-                  value={`${roomType}-${sharing}`}
-                  onChange={(e) => {
-                    const [t, s] = e.target.value.split("-");
-                    setRoomType(t);
-                    setSharing(s);
-                  }}
-                  className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm"
-                >
-                  <option value="AC-2">AC · 2 sharing</option>
-                  <option value="AC-3">AC · 3 sharing</option>
-                  <option value="Non-AC-4">Non-AC · 4 sharing</option>
-                  <option value="Non-AC-2">Non-AC · 2 sharing</option>
-                </select>
+              <Button type="button" variant="outline" size="sm" onClick={() => navigate({ to: "/roommates" })}>
+                Retake Questionnaire
+              </Button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3 text-xs">
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Sleep Schedule</span>
+                <p className="font-bold text-sm mt-0.5">{student.traits?.sleep || "10 PM – 12 AM"}</p>
               </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Additional Notes / Special Requirements</Label>
-                <Textarea
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="E.g., prefer ground floor room, study quiet zone"
-                />
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Cleanliness Standard</span>
+                <p className="font-bold text-sm mt-0.5">{String(student.traits?.cleanliness || "Very Clean")}</p>
+              </div>
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Food Preference</span>
+                <p className="font-bold text-sm mt-0.5">{student.traits?.food || "Non-Veg"}</p>
+              </div>
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Personality Type</span>
+                <p className="font-bold text-sm mt-0.5">{student.traits?.personality || "Ambivert"}</p>
+              </div>
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Noise Tolerance</span>
+                <p className="font-bold text-sm mt-0.5">{student.traits?.noise || "Moderate"}</p>
+              </div>
+              <div className="rounded-xl border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Hometown & Language</span>
+                <p className="font-bold text-sm mt-0.5">{student.hometown || "Campus"} ({student.language || "Tamil"})</p>
+              </div>
+            </div>
+
+            {/* Top Compatible Applicants Preview */}
+            <div className="mt-5 border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  Top Compatible Roommates applying for {requiredType} Hostels
+                </h3>
+                <span className="text-xs text-primary font-semibold">Live Compatibility Match</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(Array.isArray(roommateMatches) ? roommateMatches : []).slice(0, 4).map((match) => (
+                  <div key={match.regNo} className="flex items-center justify-between rounded-xl border bg-card p-3 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <img src={match.avatar} alt={match.name} className="size-10 rounded-xl object-cover" />
+                      <div>
+                        <p className="text-xs font-bold">{match.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{match.dept} · {match.hometown || "Campus"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="hero" className="text-[11px] py-0.5">
+                        {match.compatibility}%
+                      </Badge>
+                      <Button size="icon" variant="ghost" className="size-7" type="button" onClick={() => setSelectedMatch(match)}>
+                        <Eye className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -309,6 +345,14 @@ function Page() {
           </ol>
         </section>
       </div>
+
+      <CompatibilityModal
+        student={selectedMatch}
+        currentStudent={currentUser}
+        isOpen={!!selectedMatch}
+        onClose={() => setSelectedMatch(null)}
+      />
     </AppShell>
   );
 }
+

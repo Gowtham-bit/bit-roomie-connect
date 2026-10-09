@@ -2,13 +2,15 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Heart, RefreshCw, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Heart, RefreshCw, Sparkles, X, Eye } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useRoommateMatches, useSendRoommateRequest, useCurrentUser } from "@/hooks/use-hostel-api";
+import { useRoommateMatches, useSendRoommateRequest, useCurrentUser, useUpdateProfile } from "@/hooks/use-hostel-api";
+import { CompatibilityModal } from "@/components/compatibility-modal";
+
 
 export const Route = createFileRoute("/roommates")({
   head: () => ({
@@ -101,12 +103,14 @@ function RoommatesPage() {
 
   const { data: matchesData = [] } = useRoommateMatches({ regNo: currentRegNo });
   const sendRequestMutation = useSendRoommateRequest();
+  const updateProfileMutation = useUpdateProfile();
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [done, setDone] = useState(false);
   const [rejected, setRejected] = useState([]);
   const [requested, setRequested] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const current = questions[step];
   const progress = Math.round(((step + (answers[current.id] ? 1 : 0)) / questions.length) * 100);
@@ -143,6 +147,29 @@ function RoommatesPage() {
       if (step < questions.length - 1) setTimeout(() => setStep((s) => s + 1), 160);
     }
   };
+
+  const finishQuestionnaire = () => {
+    setDone(true);
+    updateProfileMutation.mutate({
+      traits: {
+        sleep: answers.sleep || "10 PM – 12 AM",
+        wake: answers.wake || "6–8 AM",
+        cleanliness: answers.clean || "Very Clean",
+        noise: answers.noise || "Moderate",
+        personality: answers.personality || "Ambivert",
+        study: answers.study || "Night",
+        food: answers.food || "Non-Veg",
+        visitors: answers.visitors || "Occasionally",
+        qualities: answers.qualities ? answers.qualities.split(", ") : ["Clean", "Friendly"],
+      },
+      interests: answers.hobbies ? answers.hobbies.split(", ") : ["Coding", "Cricket"],
+    });
+
+    toast.success("Compatibility Profile Saved", {
+      description: "Your answers are updated and ranked against hostellers.",
+    });
+  };
+
   return (
     <AppShell
       title="Roommate compatibility"
@@ -230,15 +257,7 @@ function RoommatesPage() {
                 <ArrowLeft className="size-4" /> Back
               </Button>
               {step === questions.length - 1 ? (
-                <Button
-                  variant="hero"
-                  onClick={() => {
-                    setDone(true);
-                    toast.success("Compatibility profile saved", {
-                      description: "We ranked 100 hostellers against your answers.",
-                    });
-                  }}
-                >
+                <Button variant="hero" onClick={finishQuestionnaire}>
                   <Sparkles className="size-4" /> See my matches
                 </Button>
               ) : (
@@ -325,8 +344,12 @@ function RoommatesPage() {
                   </div>
 
                   <div className="mt-5 grid grid-cols-3 gap-2">
-                    <Button asChild size="sm" variant="outline">
-                      <Link to="/requests">Profile</Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedStudent(m)}
+                    >
+                      <Eye className="size-3.5 mr-1" /> View Answers
                     </Button>
                     <Button
                       size="sm"
@@ -369,9 +392,30 @@ function RoommatesPage() {
           </div>
         </div>
       )}
+
+      {/* Compatibility Questionnaire Answers Modal */}
+      <CompatibilityModal
+        student={selectedStudent}
+        currentStudent={currentUser}
+        isOpen={!!selectedStudent}
+        onClose={() => setSelectedStudent(null)}
+        onRequest={(student) => {
+          const targetId = student.matchId || student.regNo;
+          setRequested((r) => [...r, targetId]);
+          sendRequestMutation.mutate({
+            requesterRegNo: currentRegNo,
+            targetRegNo: student.regNo,
+            status: "Requested",
+          });
+          toast.success(`Roommate request sent to ${student.name.split(" ")[0]}`);
+          setSelectedStudent(null);
+        }}
+        isRequested={selectedStudent && (requested.includes(selectedStudent.matchId || selectedStudent.regNo) || selectedStudent.status === "Requested")}
+      />
     </AppShell>
   );
 }
+
 function Kpi({ label, value }) {
   return (
     <div>
