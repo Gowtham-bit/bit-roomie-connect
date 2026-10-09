@@ -43,6 +43,7 @@ const studentNav = [
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/notifications", label: "Notifications", icon: Bell },
+      { to: "/chat", label: "Direct Chat", icon: MessageSquare },
       { to: "/profile", label: "My Profile", icon: UserCircle },
     ],
   },
@@ -58,7 +59,7 @@ const studentNav = [
     group: "Roommates",
     items: [
       { to: "/roommates", label: "Compatibility Match", icon: Heart },
-      { to: "/requests", label: "Requests & Chat", icon: MessageSquare },
+      { to: "/requests", label: "Requests", icon: Users },
     ],
   },
   {
@@ -87,6 +88,7 @@ const adminNav = [
   {
     group: "Operations",
     items: [
+      { to: "/chat", label: "Support Chat", icon: MessageSquare },
       { to: "/admin/complaints", label: "Complaint Desk", icon: Wrench },
       { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
       { to: "/admin/reports", label: "Reports", icon: FileBarChart },
@@ -98,6 +100,7 @@ const wardenNav = [
     group: "Warden",
     items: [
       { to: "/warden", label: "Warden Dashboard", icon: LayoutDashboard },
+      { to: "/chat", label: "Student Chat", icon: MessageSquare },
       { to: "/admin/complaints", label: "Complaints", icon: Wrench },
       { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
       { to: "/hostels", label: "Occupancy", icon: Building2 },

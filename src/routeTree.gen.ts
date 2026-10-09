@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ComplaintsRouteImport } from './routes/complaints'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
@@ -52,6 +53,11 @@ const ApplyRoute = ApplyRouteImport.update({
 const AttendanceRoute = AttendanceRouteImport.update({
   id: '/attendance',
   path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComplaintsRoute = ComplaintsRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
+  '/chat': typeof ChatRoute
   '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
+  '/chat': typeof ChatRoute
   '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/apply': typeof ApplyRoute
   '/attendance': typeof AttendanceRoute
+  '/chat': typeof ChatRoute
   '/complaints': typeof ComplaintsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apply'
     | '/attendance'
+    | '/chat'
     | '/complaints'
     | '/dashboard'
     | '/login'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apply'
     | '/attendance'
+    | '/chat'
     | '/complaints'
     | '/dashboard'
     | '/login'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apply'
     | '/attendance'
+    | '/chat'
     | '/complaints'
     | '/dashboard'
     | '/login'
@@ -320,6 +332,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ApplyRoute: typeof ApplyRoute
   AttendanceRoute: typeof AttendanceRoute
+  ChatRoute: typeof ChatRoute
   ComplaintsRoute: typeof ComplaintsRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/attendance'
       fullPath: '/attendance'
       preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/complaints': {
@@ -535,6 +555,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ApplyRoute: ApplyRoute,
   AttendanceRoute: AttendanceRoute,
+  ChatRoute: ChatRoute,
   ComplaintsRoute: ComplaintsRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,

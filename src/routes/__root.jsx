@@ -124,15 +124,20 @@ function RootShell({ children }) {
     </html>
   );
 }
+import { SocketProvider } from "@/context/SocketContext";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="top-right" richColors closeButton />
+        <SocketProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="top-right" richColors closeButton />
+        </SocketProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
+

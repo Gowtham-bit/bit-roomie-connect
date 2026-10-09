@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import {
   useCurrentUser,
   useHostels,
-  
   useSubmitApplication,
   useApplications,
   useRoommateMatches,

@@ -334,3 +334,33 @@ export async function apiGetStats() {
   if (data && !data.error) return data;
   return { stats: mockStats, occupancyByHostel: mockOccupancy };
 }
+
+// CHAT API
+export { getToken };
+
+export async function apiGetConversations() {
+  const data = await request("/chat/conversations");
+  if (data && !data.error) return data;
+  return [];
+}
+
+export async function apiCreateConversation(targetId) {
+  const res = await request("/chat/conversations", {
+    method: "POST",
+    body: JSON.stringify({ targetId }),
+  });
+  return res;
+}
+
+export async function apiGetMessages(conversationId) {
+  const data = await request(`/chat/conversations/${conversationId}/messages`);
+  if (data && !data.error) return data;
+  return [];
+}
+
+export async function apiSearchUsers(query = "") {
+  const data = await request(`/chat/users?query=${encodeURIComponent(query)}`);
+  if (data && !data.error) return data;
+  return [];
+}
+

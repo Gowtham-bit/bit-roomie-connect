@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -115,13 +115,11 @@ function Page() {
                   <Button
                     size="sm"
                     variant="soft"
-                    onClick={() =>
-                      toast("Chat session started", {
-                        description: `Direct message channel opened with ${m.name}.`,
-                      })
-                    }
+                    asChild
                   >
-                    Chat
+                    <Link to="/chat" search={{ target: m.id || m.regNo }}>
+                      Chat
+                    </Link>
                   </Button>
                 </li>
               ))

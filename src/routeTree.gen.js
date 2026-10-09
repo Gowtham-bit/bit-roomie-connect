@@ -149,6 +149,14 @@ const HostelsHostelIdRoute = HostelsHostelIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 });
 
+import { Route as ChatRouteImport } from "./routes/chat";
+
+const ChatRoute = ChatRouteImport.update({
+  id: "/chat",
+  path: "/chat",
+  getParentRoute: () => rootRouteImport,
+});
+
 const rootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -161,6 +169,7 @@ const rootRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   ApplyRoute: ApplyRoute,
   AttendanceRoute: AttendanceRoute,
+  ChatRoute: ChatRoute,
   ComplaintsRoute: ComplaintsRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
