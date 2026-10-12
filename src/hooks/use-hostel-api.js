@@ -7,6 +7,7 @@ import {
   apiSendRoommateRequest,
   apiGetComplaints,
   apiCreateComplaint,
+  apiUpdateComplaintStatus,
   apiGetPayments,
   apiGetAttendance,
   apiMarkAttendance,
@@ -136,6 +137,27 @@ export function useComplaints(params = {}) {
   return useQuery({
     queryKey: ["complaints", params],
     queryFn: () => apiGetComplaints(params),
+    refetchInterval: 3000,
+  });
+}
+
+export function useCreateComplaint() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiCreateComplaint,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["complaints"] });
+    },
+  });
+}
+
+export function useUpdateComplaintStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status, assignedTo }) => apiUpdateComplaintStatus(id, status, assignedTo),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["complaints"] });
+    },
   });
 }
 
@@ -183,16 +205,6 @@ export function useSendRoommateRequest() {
     mutationFn: apiSendRoommateRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roommates"] });
-    },
-  });
-}
-
-export function useCreateComplaint() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: apiCreateComplaint,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["complaints"] });
     },
   });
 }

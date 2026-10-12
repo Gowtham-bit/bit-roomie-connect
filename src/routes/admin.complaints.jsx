@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useComplaints } from "@/hooks/use-hostel-api";
+import { useComplaints, useUpdateComplaintStatus } from "@/hooks/use-hostel-api";
 import { Wrench, CheckCircle2, Clock, Filter, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/complaints")({
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/admin/complaints")({
 
 function ComplaintsDeskPage() {
   const { data: complaintsData = [] } = useComplaints();
+  const updateStatusMutation = useUpdateComplaintStatus();
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
 
@@ -33,10 +34,21 @@ function ComplaintsDeskPage() {
     return matchCat && matchStat;
   });
 
-  const handleStatusUpdate = (id, newStatus) => {
-    toast.success(`Complaint #${id} Updated`, {
-      description: `Status changed to ${newStatus}.`,
-    });
+  const handleStatusUpdate = (complaintObj, newStatus) => {
+    const targetId = complaintObj._id || complaintObj.id;
+    updateStatusMutation.mutate(
+      { id: targetId, status: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(`Complaint #${complaintObj.id || "C001"} Updated`, {
+            description: `Status successfully updated to ${newStatus} in MongoDB.`,
+          });
+        },
+        onError: (err) => {
+          toast.error("Failed to update status", { description: err.message });
+        },
+      }
+    );
   };
 
   return (
@@ -117,14 +129,16 @@ function ComplaintsDeskPage() {
                   <Button
                     size="sm"
                     variant="soft"
-                    onClick={() => handleStatusUpdate(c.id, "In Progress")}
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() => handleStatusUpdate(c, "In Progress")}
                   >
                     <Clock className="mr-1 size-3.5" /> In Progress
                   </Button>
                   <Button
                     size="sm"
                     variant="hero"
-                    onClick={() => handleStatusUpdate(c.id, "Resolved")}
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() => handleStatusUpdate(c, "Resolved")}
                   >
                     <CheckCircle2 className="mr-1 size-3.5" /> Resolve
                   </Button>

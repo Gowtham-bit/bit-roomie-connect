@@ -296,6 +296,14 @@ export async function apiCreateComplaint(payload) {
   return res || { ...payload, id: `C${Date.now().toString().slice(-3)}`, status: "Pending" };
 }
 
+export async function apiUpdateComplaintStatus(id, status, assignedTo) {
+  const res = await request(`/complaints/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status, assignedTo }),
+  });
+  return res;
+}
+
 // PAYMENTS API
 export async function apiGetPayments(params = {}) {
   const query = new URLSearchParams(params).toString();
@@ -349,7 +357,24 @@ export async function apiCreateConversation(targetId) {
     method: "POST",
     body: JSON.stringify({ targetId }),
   });
-  return res;
+  if (res && !res.error) return res;
+
+  // Fallback local conversation creation if backend is offline/unreachable
+  const mockTarget = mockStudents.find((s) => s.id === targetId || s.regNo === targetId) || {
+    id: targetId,
+    regNo: targetId,
+    name: targetId === "W001" ? "Boys Hostel Warden" : targetId === "W002" ? "Girls Hostel Warden" : targetId,
+    avatar: "https://i.pravatar.cc/160?img=12",
+    dept: "Hostel Admin",
+  };
+
+  return {
+    _id: `conv_fallback_${targetId}`,
+    participants: ["current", targetId],
+    recipient: mockTarget,
+    lastMessage: "",
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export async function apiGetMessages(conversationId) {
@@ -360,7 +385,26 @@ export async function apiGetMessages(conversationId) {
 
 export async function apiSearchUsers(query = "") {
   const data = await request(`/chat/users?query=${encodeURIComponent(query)}`);
-  if (data && !data.error) return data;
-  return [];
+  if (data && !data.error && Array.isArray(data) && data.length > 0) return data;
+
+  // Fallback to searching mockStudents and Wardens
+  const q = query.toLowerCase().trim();
+  const wardens = [
+    { id: "W001", regNo: "warden123", name: "Boys Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=60", dept: "Hostel Admin" },
+    { id: "W002", regNo: "gwarden123", name: "Girls Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=47", dept: "Hostel Admin" },
+  ];
+
+  const matchedWardens = wardens.filter((w) => !q || w.name.toLowerCase().includes(q) || w.dept.toLowerCase().includes(q));
+  const matchedStudents = mockStudents
+    .filter(
+      (s) =>
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        s.regNo.toLowerCase().includes(q) ||
+        (s.dept || s.department || "").toLowerCase().includes(q)
+    )
+    .slice(0, 20);
+
+  return [...matchedWardens, ...matchedStudents];
 }
 

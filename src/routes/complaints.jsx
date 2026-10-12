@@ -55,6 +55,7 @@ function Page() {
         regNo: student.regNo || "7376242AD142",
         category,
         title,
+        description,
         hostel: student.hostel || "Sapphire Block",
         room: student.room || "312",
         priority,
@@ -63,7 +64,7 @@ function Page() {
         onSuccess: () => {
           toast.success("Complaint registered", {
             description:
-              "Your complaint has been saved into MongoDB. You will be notified when staff is assigned.",
+              "Your complaint has been saved into MongoDB. Staff will be assigned shortly.",
           });
           setTitle("");
           setDescription("");
@@ -108,7 +109,7 @@ function Page() {
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tube light not working"
+              placeholder="e.g., Tube light not working in room"
             />
           </div>
           <div className="space-y-2">
@@ -133,11 +134,6 @@ function Page() {
               <option>High</option>
             </select>
           </div>
-          <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed px-4 py-3 text-sm">
-            <span>Attach images</span>
-            <span className="text-xs font-semibold text-primary">Upload</span>
-            <input type="file" multiple className="sr-only" />
-          </label>
           <Button
             type="submit"
             variant="hero"
@@ -152,26 +148,38 @@ function Page() {
           <h2 className="text-lg font-bold">My complaints</h2>
           <ul className="mt-4 space-y-3">
             {mine.map((c) => (
-              <li key={c.id} className="rounded-xl border p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold">{c.title}</p>
-                  <Badge variant="outline">{c.category}</Badge>
-                  <Badge variant={c.priority === "High" ? "destructive" : "secondary"}>
-                    {c.priority}
-                  </Badge>
+              <li key={c.id || c._id} className="rounded-xl border p-4 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold">{c.title}</p>
+                    <Badge variant="outline">{c.category}</Badge>
+                    <Badge variant={c.priority === "High" ? "destructive" : "secondary"}>
+                      {c.priority}
+                    </Badge>
+                  </div>
                   <Badge
-                    className="ml-auto"
-                    variant={c.status === "Resolved" ? "default" : "secondary"}
+                    variant={
+                      c.status === "Resolved"
+                        ? "default"
+                        : c.status === "In Progress"
+                          ? "secondary"
+                          : "outline"
+                    }
                   >
                     {c.status}
                   </Badge>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {c.id} · {c.hostel} · Room {c.room} · raised {c.createdAt} · {c.assignedTo}
+                {c.description && (
+                  <p className="text-xs text-foreground/80 bg-muted/40 p-2 rounded-lg">
+                    {c.description}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  ID: {c.id || "C001"} · {c.hostel} #{c.room} · Raised on {c.createdAt} · Assigned: <span className="font-medium text-foreground">{c.assignedTo || "Maintenance Team"}</span>
                 </p>
                 <Progress
                   value={c.status === "Resolved" ? 100 : c.status === "In Progress" ? 60 : 25}
-                  className="mt-3"
+                  className="mt-2"
                 />
               </li>
             ))}
