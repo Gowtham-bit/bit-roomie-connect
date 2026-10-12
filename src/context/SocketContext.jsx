@@ -8,6 +8,17 @@ export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [authTrigger, setAuthTrigger] = useState(0);
+
+  useEffect(() => {
+    const syncAuth = () => setAuthTrigger((prev) => prev + 1);
+    window.addEventListener("bit_auth_change", syncAuth);
+    window.addEventListener("storage", syncAuth);
+    return () => {
+      window.removeEventListener("bit_auth_change", syncAuth);
+      window.removeEventListener("storage", syncAuth);
+    };
+  }, []);
 
   const currentUser = getCurrentUser();
   const token = getToken();
@@ -26,7 +37,12 @@ export function SocketProvider({ children }) {
 
     const newSocket = io(SOCKET_SERVER_URL, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
     });
 
     newSocket.on("connect", () => {
@@ -35,11 +51,11 @@ export function SocketProvider({ children }) {
     });
 
     newSocket.on("get_online_users", (users) => {
-      setOnlineUsers(users);
+      setOnlineUsers(users || []);
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("🔴 Socket Disconnected");
+    newSocket.on("disconnect", (reason) => {
+      console.log("🔴 Socket Disconnected:", reason);
       setIsConnected(false);
     });
 
@@ -53,7 +69,7 @@ export function SocketProvider({ children }) {
     return () => {
       newSocket.disconnect();
     };
-  }, [token, currentUser?.id, currentUser?.regNo]);
+  }, [token, currentUser?.id, currentUser?.regNo, authTrigger]);
 
   return (
     <SocketContext.Provider value={{ socket, onlineUsers, isConnected }}>

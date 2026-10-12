@@ -25,6 +25,7 @@ export function setToken(token) {
   if (typeof window !== "undefined") {
     if (token) localStorage.setItem("bit_auth_token", token);
     else localStorage.removeItem("bit_auth_token");
+    window.dispatchEvent(new Event("bit_auth_change"));
   }
 }
 
@@ -46,6 +47,7 @@ export function setCurrentUser(user) {
   if (typeof window !== "undefined") {
     if (user) localStorage.setItem("bit_user", JSON.stringify(user));
     else localStorage.removeItem("bit_user");
+    window.dispatchEvent(new Event("bit_auth_change"));
   }
 }
 

@@ -65,6 +65,12 @@ function ChatPage() {
   const typingTimeoutRef = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const activeConversationRef = useRef(activeConversation);
+
+  // Keep activeConversationRef in sync with current state
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
 
   // Parse URL search params if target user parameter is passed e.g. /chat?target=S002
   const searchParams = useSearch({ strict: false });
@@ -92,80 +98,190 @@ function ChatPage() {
     loadConversations();
   }, [initialTarget]);
 
-  // 2. Load Messages when Active Conversation changes
+  // 2. Immediate Socket Room Subscription on Active Conversation Change
   useEffect(() => {
-    if (!activeConversation?._id) return;
+    if (!socket || !activeConversation?._id) return;
 
+    socket.emit("join_conversation", activeConversation._id);
+    socket.emit("mark_as_read", { conversationId: activeConversation._id });
+
+    return () => {
+      socket.emit("leave_conversation", activeConversation._id);
+    };
+  }, [socket, activeConversation?._id]);
+
+  // 3. Re-join active room whenever socket reconnects
+  useEffect(() => {
+    if (!socket) return;
+    const handleSocketConnect = () => {
+      if (activeConversationRef.current?._id) {
+        socket.emit("join_conversation", activeConversationRef.current._id);
+        socket.emit("mark_as_read", { conversationId: activeConversationRef.current._id });
+      }
+    };
+    socket.on("connect", handleSocketConnect);
+    return () => {
+      socket.off("connect", handleSocketConnect);
+    };
+  }, [socket]);
+
+  // 4. Load Messages History when Active Conversation changes
+  useEffect(() => {
+    if (!activeConversation?._id) {
+      setMessages([]);
+      return;
+    }
+
+    let isMounted = true;
     async function loadMessages() {
       setLoadingMessages(true);
       try {
         const history = await apiGetMessages(activeConversation._id);
-        setMessages(history || []);
-
-        // Join socket room
-        if (socket) {
-          socket.emit("join_conversation", activeConversation._id);
-          socket.emit("mark_as_read", { conversationId: activeConversation._id });
+        if (isMounted) {
+          setMessages(history || []);
         }
       } catch (err) {
         console.error("Failed to load messages:", err);
       } finally {
-        setLoadingMessages(false);
+        if (isMounted) {
+          setLoadingMessages(false);
+        }
       }
     }
 
     loadMessages();
 
     return () => {
-      if (socket && activeConversation?._id) {
-        socket.emit("leave_conversation", activeConversation._id);
-      }
+      isMounted = false;
     };
-  }, [activeConversation?._id, socket]);
+  }, [activeConversation?._id]);
 
-  // 3. Auto-scroll to bottom of messages
+  // 5. Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // 4. Socket Listeners for Real-Time Updates
+  // 6. Socket Listeners for Real-Time Updates
   useEffect(() => {
     if (!socket) return;
 
     const handleReceiveMessage = (incomingMsg) => {
-      if (incomingMsg.conversationId === activeConversation?._id) {
-        setMessages((prev) => [...prev, incomingMsg]);
-        socket.emit("mark_as_read", { conversationId: activeConversation._id });
+      const incomingConvId = String(incomingMsg.conversationId);
+      const activeConvId = activeConversationRef.current?._id
+        ? String(activeConversationRef.current._id)
+        : null;
+
+      // A. If message belongs to current active conversation, update messages array
+      if (activeConvId && incomingConvId === activeConvId) {
+        setMessages((prev) => {
+          // Prevent duplicates if already exists by MongoDB _id
+          if (incomingMsg._id && prev.some((m) => m._id === incomingMsg._id)) {
+            return prev;
+          }
+
+          // Reconcile optimistic temp message if tempId matches
+          if (incomingMsg.tempId) {
+            const tempIdx = prev.findIndex(
+              (m) => m._id === incomingMsg.tempId || m.tempId === incomingMsg.tempId
+            );
+            if (tempIdx !== -1) {
+              const updated = [...prev];
+              updated[tempIdx] = incomingMsg;
+              return updated;
+            }
+          }
+
+          // Fallback reconcile for sender's optimistic temp message
+          if (incomingMsg.senderId === currentUserId) {
+            const tempIdx = prev.findIndex(
+              (m) =>
+                typeof m._id === "string" &&
+                m._id.startsWith("temp_") &&
+                m.senderId === incomingMsg.senderId &&
+                m.text === incomingMsg.text
+            );
+            if (tempIdx !== -1) {
+              const updated = [...prev];
+              updated[tempIdx] = incomingMsg;
+              return updated;
+            }
+          }
+
+          // Append new message
+          return [...prev, incomingMsg];
+        });
+
+        // Mark as read if from other user
+        if (incomingMsg.senderId !== currentUserId) {
+          socket.emit("mark_as_read", { conversationId: activeConvId });
+        }
       }
+
+      // B. Always update conversation snippet in left sidebar instantly
+      setConversations((prev) => {
+        const exists = prev.some((c) => String(c._id) === incomingConvId);
+        if (!exists) {
+          // New contact/conversation: re-fetch conversation list to display it
+          apiGetConversations().then((data) => {
+            if (data) setConversations(data);
+          });
+          return prev;
+        }
+
+        return prev
+          .map((c) => {
+            if (String(c._id) === incomingConvId) {
+              const isActive = activeConvId === incomingConvId;
+              const newUnread = isActive
+                ? 0
+                : (c.unreadCount || 0) + (incomingMsg.senderId !== currentUserId ? 1 : 0);
+              return {
+                ...c,
+                lastMessage: incomingMsg.text,
+                lastMessageSender: incomingMsg.senderId,
+                updatedAt: incomingMsg.createdAt || new Date().toISOString(),
+                unreadCount: newUnread,
+              };
+            }
+            return c;
+          })
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     };
 
     const handleUserTyping = ({ conversationId, userId }) => {
-      if (conversationId === activeConversation?._id && userId !== currentUserId) {
+      if (
+        String(conversationId) === String(activeConversationRef.current?._id) &&
+        userId !== currentUserId
+      ) {
         setIsTyping(true);
       }
     };
 
     const handleUserStopTyping = ({ conversationId, userId }) => {
-      if (conversationId === activeConversation?._id && userId !== currentUserId) {
+      if (
+        String(conversationId) === String(activeConversationRef.current?._id) &&
+        userId !== currentUserId
+      ) {
         setIsTyping(false);
       }
     };
 
     const handleConversationUpdated = ({ conversationId, lastMessage, lastMessageSender, updatedAt }) => {
       setConversations((prev) =>
-        prev.map((c) =>
-          c._id === conversationId
-            ? { ...c, lastMessage, lastMessageSender, updatedAt }
-            : c
-        ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        prev
+          .map((c) =>
+            String(c._id) === String(conversationId)
+              ? { ...c, lastMessage, lastMessageSender, updatedAt }
+              : c
+          )
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
       );
     };
 
     const handleMessagesRead = ({ conversationId }) => {
-      if (conversationId === activeConversation?._id) {
-        setMessages((prev) =>
-          prev.map((m) => ({ ...m, isRead: true }))
-        );
+      if (String(conversationId) === String(activeConversationRef.current?._id)) {
+        setMessages((prev) => prev.map((m) => ({ ...m, isRead: true })));
       }
     };
 
@@ -182,7 +298,7 @@ function ChatPage() {
       socket.off("conversation_updated", handleConversationUpdated);
       socket.off("messages_read", handleMessagesRead);
     };
-  }, [socket, activeConversation?._id, currentUserId]);
+  }, [socket, currentUserId]);
 
   // Search User Handler
   useEffect(() => {
@@ -208,7 +324,7 @@ function ChatPage() {
       const conv = await apiCreateConversation(targetId);
       if (conv && !conv.error) {
         setConversations((prev) => {
-          const exists = prev.find((c) => c._id === conv._id);
+          const exists = prev.find((c) => String(c._id) === String(conv._id));
           if (exists) return prev;
           return [conv, ...prev];
         });
@@ -228,10 +344,12 @@ function ChatPage() {
 
     const recipientId = activeConversation.recipient?.id || activeConversation.recipient?.regNo;
     const messageText = newMessageText.trim();
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-    // Optimistic payload
+    // Optimistic payload with unique tempId
     const tempMsg = {
-      _id: `temp_${Date.now()}`,
+      _id: tempId,
+      tempId,
       conversationId: activeConversation._id,
       senderId: currentUserId,
       receiverId: recipientId,
@@ -248,17 +366,28 @@ function ChatPage() {
       socket.emit("stop_typing", { conversationId: activeConversation._id, receiverId: recipientId });
     }
 
-    if (socket && isConnected) {
+    if (socket) {
       socket.emit(
         "send_message",
         {
           conversationId: activeConversation._id,
           receiverId: recipientId,
           text: messageText,
+          tempId,
         },
         (res) => {
           if (res?.error) {
             toast.error("Failed to send message: " + res.error);
+            setMessages((prev) => prev.filter((m) => m._id !== tempId));
+          } else if (res?.message) {
+            // Reconcile optimistic temp message with database message immediately
+            setMessages((prev) =>
+              prev.map((m) =>
+                m._id === tempId || m.tempId === tempId
+                  ? { ...res.message, _id: res.message._id }
+                  : m
+              )
+            );
           }
         }
       );
