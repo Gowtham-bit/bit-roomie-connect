@@ -67,7 +67,7 @@ function LoginPage() {
   });
   const active = roles.find((r) => r.key === role);
   return (
-    <div className="gradient-hero relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-14">
+    <div className="gradient-hero relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-3.5 sm:px-4 py-8 sm:py-14">
       <div className="pointer-events-none absolute -top-32 -left-20 size-[26rem] animate-float rounded-full bg-primary/25 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 bottom-0 size-[26rem] animate-float rounded-full bg-accent/20 blur-3xl" />
       <div className="absolute top-4 right-4">
@@ -78,7 +78,7 @@ function LoginPage() {
         initial={{ opacity: 0, y: 26 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass relative w-full max-w-md rounded-3xl p-7 shadow-elegant sm:p-9"
+        className="glass relative w-full max-w-md rounded-2xl sm:rounded-3xl p-5 sm:p-9 shadow-elegant my-auto"
       >
         <Link to="/" className="flex items-center gap-2.5">
           <img
@@ -89,12 +89,12 @@ function LoginPage() {
           <span className="font-display font-extrabold">BIT Hostel Portal</span>
         </Link>
 
-        <h1 className="mt-7 text-2xl font-extrabold">Welcome back</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <h1 className="mt-5 sm:mt-7 text-xl sm:text-2xl font-extrabold">Welcome back</h1>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
           Choose your role and sign in to continue.
         </p>
 
-        <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl bg-muted/70 p-1.5">
+        <div className="mt-5 sm:mt-6 grid grid-cols-3 gap-1.5 sm:gap-2 rounded-2xl bg-muted/70 p-1 sm:p-1.5">
           {roles.map((r) => (
             <button
               key={r.key}

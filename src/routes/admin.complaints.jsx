@@ -53,14 +53,14 @@ function ComplaintsDeskPage() {
 
   return (
     <AppShell title="Hostel Complaint & Maintenance Desk" breadcrumb={["Admin", "Complaints"]}>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-4 shadow-soft">
-        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-          <Filter className="size-4 text-muted-foreground" />
-          <span>Filter Category:</span>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 rounded-2xl border bg-card p-3.5 sm:p-4 shadow-soft">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-semibold w-full sm:w-auto">
+          <Filter className="size-4 text-muted-foreground shrink-0" />
+          <span>Category:</span>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 text-xs"
+            className="h-9 rounded-xl border border-input bg-background px-3 text-xs flex-1 sm:flex-initial"
           >
             <option value="All">All Categories</option>
             <option value="Electricity">Electricity</option>
@@ -74,7 +74,7 @@ function ComplaintsDeskPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 text-xs"
+            className="h-9 rounded-xl border border-input bg-background px-3 text-xs flex-1 sm:flex-initial"
           >
             <option value="All">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -88,10 +88,10 @@ function ComplaintsDeskPage() {
         {filtered.map((c) => (
           <div
             key={c.id}
-            className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5 shadow-soft"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-2xl border bg-card p-4 sm:p-5 shadow-soft"
           >
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="font-bold text-sm">{c.title}</span>
                 <Badge variant="outline">{c.category}</Badge>
                 <Badge
@@ -112,7 +112,7 @@ function ComplaintsDeskPage() {
               <p className="text-xs font-medium text-primary">Assigned to: {c.assignedTo || "Maintenance Team"}</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 sm:pt-0 border-t sm:border-t-0">
               <Badge
                 variant={
                   c.status === "Resolved"
@@ -131,6 +131,7 @@ function ComplaintsDeskPage() {
                     variant="soft"
                     disabled={updateStatusMutation.isPending}
                     onClick={() => handleStatusUpdate(c, "In Progress")}
+                    className="flex-1 sm:flex-initial"
                   >
                     <Clock className="mr-1 size-3.5" /> In Progress
                   </Button>
@@ -139,6 +140,7 @@ function ComplaintsDeskPage() {
                     variant="hero"
                     disabled={updateStatusMutation.isPending}
                     onClick={() => handleStatusUpdate(c, "Resolved")}
+                    className="flex-1 sm:flex-initial"
                   >
                     <CheckCircle2 className="mr-1 size-3.5" /> Resolve
                   </Button>

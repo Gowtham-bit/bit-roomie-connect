@@ -153,7 +153,7 @@ function AdminDashboard() {
 
   return (
     <AppShell title="BIT Hostel System Administration" breadcrumb={["Admin Dashboard"]}>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Users}
           title="Total Students Allocated"
@@ -181,9 +181,9 @@ function AdminDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold">Hostel Block Occupancy Analytics</h2>
-          <div className="mt-6 h-72 w-full">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold">Hostel Block Occupancy Analytics</h2>
+          <div className="mt-4 sm:mt-6 h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={occupancyChart.length > 0 ? occupancyChart : [
                 { name: "Sapphire", occupied: 280, vacant: 70 },
@@ -193,8 +193,8 @@ function AdminDashboard() {
                 { name: "Yamuna", occupied: 230, vacant: 50 },
               ]}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" stroke="#888888" fontSize={12} />
-                <YAxis stroke="#888888" fontSize={12} />
+                <XAxis dataKey="name" stroke="#888888" fontSize={11} interval={0} />
+                <YAxis stroke="#888888" fontSize={11} />
                 <Tooltip />
                 <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Occupied" />
                 <Bar dataKey="vacant" fill="var(--color-muted-foreground)" radius={[4, 4, 0, 0]} name="Vacant" />
@@ -204,7 +204,7 @@ function AdminDashboard() {
         </section>
 
         <section className="space-y-6">
-          <div className="rounded-2xl border bg-card p-6 shadow-soft">
+          <div className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
             <h2 className="text-base font-bold flex items-center gap-2">
               <Server className="size-5 text-primary" /> Database & System Health
             </h2>
@@ -225,7 +225,7 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border bg-card p-6 shadow-soft">
+          <div className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
             <h2 className="text-base font-bold mb-3">Hostel Blocks Directory</h2>
             <div className="space-y-2 max-h-56 overflow-y-auto">
               {hostelsList.map((h) => (
@@ -240,15 +240,15 @@ function AdminDashboard() {
         </section>
 
         {/* Hostel Applications Approval Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft lg:col-span-2">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft lg:col-span-2">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <ClipboardList className="size-5 text-primary" /> Hostel Applications Admin Approval Desk
           </h2>
           <p className="text-xs text-muted-foreground mt-1">Review applications approved by Wardens, manually assign room numbers, and complete room allotment.</p>
           <div className="mt-4 space-y-3">
             {appsList.length > 0 ? (
               appsList.map((a) => (
-                <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+                <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
                   <div>
                     <p className="text-sm font-bold">{a.studentName} ({a.regNo})</p>
                     <p className="text-xs text-muted-foreground">
@@ -256,47 +256,50 @@ function AdminDashboard() {
                     </p>
                     <p className="text-xs text-muted-foreground">Applied Date: {a.appliedDate}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0">
                     {a.status === "Room Allotted" || a.status === "Approved" ? (
-                      <Badge variant="default" className="px-3 py-1">
+                      <Badge variant="default" className="px-3 py-1 self-start sm:self-auto">
                         Room Allotted: Room {a.allottedRoom || "101"}
                       </Badge>
                     ) : (
                       <>
-                        <Badge variant={a.status.includes("Rejected") ? "destructive" : "secondary"}>
+                        <Badge variant={a.status.includes("Rejected") ? "destructive" : "secondary"} className="self-start sm:self-auto">
                           {a.status === "Approved by Warden" ? "Warden Approved" : a.status}
                         </Badge>
                         {(a.status === "Approved by Warden" || a.status === "Pending" || a.status === "Pending Warden Review") && (
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => setActivePicker({ type: "app", item: a })}
-                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10 w-full sm:w-auto justify-center"
                             >
                               <Layers className="size-3.5" /> View Floor Layout & Select Room
                             </Button>
-                            <Input
-                              placeholder="Room No (101)"
-                              value={manualAppRooms[a.id] || ""}
-                              onChange={(e) => setManualAppRooms({ ...manualAppRooms, [a.id]: e.target.value })}
-                              className="h-8 w-28 text-xs"
-                            />
-                            <Button
-                              size="sm"
-                              variant="hero"
-                              disabled={updateAppMutation.isPending}
-                              onClick={() => handleAdminApproveApp(a.id, a.hostelName, a.studentName)}
-                            >
-                              Allot Room
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAdminRejectApp(a.id)}
-                            >
-                              Reject
-                            </Button>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <Input
+                                placeholder="Room No"
+                                value={manualAppRooms[a.id] || ""}
+                                onChange={(e) => setManualAppRooms({ ...manualAppRooms, [a.id]: e.target.value })}
+                                className="h-8 w-20 sm:w-28 text-xs flex-1 sm:flex-initial"
+                              />
+                              <Button
+                                size="sm"
+                                variant="hero"
+                                disabled={updateAppMutation.isPending}
+                                onClick={() => handleAdminApproveApp(a.id, a.hostelName, a.studentName)}
+                                className="flex-1 sm:flex-initial"
+                              >
+                                Allot Room
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleAdminRejectApp(a.id)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </>
@@ -311,15 +314,15 @@ function AdminDashboard() {
         </section>
 
         {/* Room Change Approvals Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft lg:col-span-2">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft lg:col-span-2">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <ShieldCheck className="size-5 text-primary" /> Room Change Approvals & Room Allocation Desk
           </h2>
           <p className="text-xs text-muted-foreground mt-1">Review room change requests approved by Wardens, inspect floor availability, manually assign room numbers, and complete allotment.</p>
           <div className="mt-4 space-y-3">
             {roomChangesList.length > 0 ? (
               roomChangesList.map((r) => (
-                <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
                   <div>
                     <p className="text-sm font-bold">{r.studentName} ({r.regNo})</p>
                     <p className="text-xs text-muted-foreground">
@@ -327,47 +330,50 @@ function AdminDashboard() {
                     </p>
                     <p className="text-xs text-muted-foreground">Reason: {r.reason}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0">
                     {r.status === "Room Allotted" || r.status === "Approved" ? (
-                      <Badge variant="default" className="px-3 py-1">
+                      <Badge variant="default" className="px-3 py-1 self-start sm:self-auto">
                         Room Allotted: Room {r.allottedRoom || "204"}
                       </Badge>
                     ) : (
                       <>
-                        <Badge variant={r.status.includes("Rejected") ? "destructive" : "secondary"}>
+                        <Badge variant={r.status.includes("Rejected") ? "destructive" : "secondary"} className="self-start sm:self-auto">
                           {r.status === "Approved by Warden" ? "Warden Approved" : r.status}
                         </Badge>
                         {(r.status === "Approved by Warden" || r.status === "Pending" || r.status === "Pending Warden Review") && (
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => setActivePicker({ type: "rc", item: r })}
-                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10 w-full sm:w-auto justify-center"
                             >
                               <Layers className="size-3.5" /> View Floor Layout & Select Room
                             </Button>
-                            <Input
-                              placeholder="Room No (204)"
-                              value={manualRcRooms[r.id] || ""}
-                              onChange={(e) => setManualRcRooms({ ...manualRcRooms, [r.id]: e.target.value })}
-                              className="h-8 w-28 text-xs"
-                            />
-                            <Button
-                              size="sm"
-                              variant="hero"
-                              disabled={updateRcMutation.isPending}
-                              onClick={() => handleAdminAllotRoom(r.id, r.targetHostel, r.studentName)}
-                            >
-                              Allot Room
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAdminRejectRc(r.id)}
-                            >
-                              Reject
-                            </Button>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <Input
+                                placeholder="Room No"
+                                value={manualRcRooms[r.id] || ""}
+                                onChange={(e) => setManualRcRooms({ ...manualRcRooms, [r.id]: e.target.value })}
+                                className="h-8 w-20 sm:w-28 text-xs flex-1 sm:flex-initial"
+                              />
+                              <Button
+                                size="sm"
+                                variant="hero"
+                                disabled={updateRcMutation.isPending}
+                                onClick={() => handleAdminAllotRoom(r.id, r.targetHostel, r.studentName)}
+                                className="flex-1 sm:flex-initial"
+                              >
+                                Allot Room
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleAdminRejectRc(r.id)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </>

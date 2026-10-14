@@ -276,28 +276,28 @@ function RoommatesPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="gradient-primary flex flex-wrap items-center justify-between gap-6 rounded-3xl p-8 text-primary-foreground shadow-elegant"
+            className="gradient-primary flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-primary-foreground shadow-elegant"
           >
             <div>
-              <p className="text-sm opacity-90">Your top compatibility score</p>
-              <p className="font-display text-5xl font-extrabold">
+              <p className="text-xs sm:text-sm opacity-90">Your top compatibility score</p>
+              <p className="font-display text-4xl sm:text-5xl font-extrabold">
                 {results[0]?.compatibility ?? 0}%
               </p>
-              <p className="mt-1 text-sm opacity-90">
+              <p className="mt-1 text-xs sm:text-sm opacity-90">
                 with {results[0]?.name} · {results[0]?.dept} · Year {results[0]?.year}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-6 text-center">
-              <Kpi label="Candidates scored" value={String(matchesList.length)} />
+            <div className="grid grid-cols-3 gap-2 sm:gap-6 text-center w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 border-white/20">
+              <Kpi label="Scored" value={String(matchesList.length)} />
               <Kpi
                 label="Above 80%"
                 value={String(matchesList.filter((m) => m.compatibility >= 80).length)}
               />
-              <Kpi label="Requests sent" value={String(requested.length)} />
+              <Kpi label="Sent" value={String(requested.length)} />
             </div>
           </motion.div>
 
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-3">
             <AnimatePresence>
               {results.map((m, i) => (
                 <motion.article
@@ -307,53 +307,57 @@ function RoommatesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94 }}
                   transition={{ delay: i * 0.04 }}
-                  className="rounded-2xl border bg-card p-5 shadow-soft transition-shadow hover:shadow-elegant"
+                  className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft transition-shadow hover:shadow-elegant flex flex-col justify-between"
                 >
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={m.avatar || "https://i.pravatar.cc/160"}
-                      alt={m.name}
-                      className="size-14 rounded-2xl object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-display font-bold">{m.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {m.dept || m.department} · Year {m.year}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {m.hometown || "Campus"} · {m.traits?.food || "Non-Veg"} ·{" "}
-                        {m.traits?.personality || "Ambivert"}
-                      </p>
+                  <div>
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <img
+                        src={m.avatar || "https://i.pravatar.cc/160"}
+                        alt={m.name}
+                        className="size-12 sm:size-14 rounded-2xl object-cover shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-display font-bold text-sm sm:text-base">{m.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {m.dept || m.department} · Year {m.year}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {m.hometown || "Campus"} · {m.traits?.food || "Non-Veg"}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-display text-xl sm:text-2xl font-extrabold text-primary">
+                          {m.compatibility}%
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">match</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-display text-2xl font-extrabold text-primary">
-                        {m.compatibility}%
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">match</p>
+
+                    <Progress value={m.compatibility} className="mt-3 sm:mt-4" />
+
+                    <div className="mt-3 sm:mt-4 flex flex-wrap gap-1.5">
+                      {(m.interests || []).slice(0, 4).map((it) => (
+                        <Badge key={it} variant="outline" className="rounded-full text-[10px] sm:text-[11px] py-0.5">
+                          {it}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
 
-                  <Progress value={m.compatibility} className="mt-4" />
-
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {(m.interests || []).map((it) => (
-                      <Badge key={it} variant="outline" className="rounded-full text-[11px]">
-                        {it}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-3 gap-2">
+                  <div className="mt-4 sm:mt-5 grid grid-cols-3 gap-1.5 sm:gap-2">
                     <Button
                       size="sm"
                       variant="outline"
+                      className="px-1.5 sm:px-2.5 text-[11px] sm:text-xs h-8 sm:h-9"
                       onClick={() => setSelectedStudent(m)}
                     >
-                      <Eye className="size-3.5 mr-1" /> View Answers
+                      <Eye className="size-3.5 mr-1 shrink-0" />
+                      <span className="truncate">View</span>
                     </Button>
                     <Button
                       size="sm"
                       variant="hero"
+                      className="px-1.5 sm:px-2.5 text-[11px] sm:text-xs h-8 sm:h-9"
                       disabled={
                         requested.includes(m.matchId || m.regNo) || m.status === "Requested"
                       }
@@ -368,14 +372,17 @@ function RoommatesPage() {
                         toast.success(`Roommate request sent to ${m.name.split(" ")[0]}`);
                       }}
                     >
-                      <Heart className="size-3.5" />
-                      {requested.includes(m.matchId || m.regNo) || m.status === "Requested"
-                        ? "Sent"
-                        : "Request"}
+                      <Heart className="size-3.5 mr-1 shrink-0" />
+                      <span className="truncate">
+                        {requested.includes(m.matchId || m.regNo) || m.status === "Requested"
+                          ? "Sent"
+                          : "Request"}
+                      </span>
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
+                      className="px-1.5 sm:px-2.5 text-[11px] sm:text-xs h-8 sm:h-9"
                       onClick={() => {
                         setRejected((r) => [...r, m.matchId]);
                         toast("Match dismissed", {
@@ -383,7 +390,8 @@ function RoommatesPage() {
                         });
                       }}
                     >
-                      <X className="size-3.5" /> Skip
+                      <X className="size-3.5 mr-1 shrink-0" />
+                      <span className="truncate">Skip</span>
                     </Button>
                   </div>
                 </motion.article>

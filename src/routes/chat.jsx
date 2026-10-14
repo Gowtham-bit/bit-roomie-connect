@@ -24,6 +24,8 @@ import {
   Sparkles,
   ArrowLeft,
   Smile,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
@@ -41,6 +43,19 @@ export const Route = createFileRoute("/chat")({
   }),
   component: ChatPage,
 });
+
+// Helper to determine styling badge for user role
+function getContactRoleBadge(user) {
+  const id = String(user?.id || user?.regNo || "").toLowerCase();
+  const role = String(user?.role || "").toLowerCase();
+  if (role === "admin" || id === "a001" || id === "admin123") {
+    return { label: "Admin", className: "bg-purple-600/90 hover:bg-purple-600 text-white border-transparent" };
+  }
+  if (role === "warden" || id === "w001" || id === "w002" || id.includes("warden")) {
+    return { label: "Warden", className: "bg-blue-600/90 hover:bg-blue-600 text-white border-transparent" };
+  }
+  return { label: "Student", className: "bg-muted text-muted-foreground border-border" };
+}
 
 // Web Audio API notification chime (lightweight WhatsApp-style soft pop/chime)
 function playNotificationSound() {
@@ -79,6 +94,15 @@ function playNotificationSound() {
 function ChatPage() {
   const currentUser = getCurrentUser() || {};
   const currentUserId = currentUser.id || currentUser.regNo;
+  const currentUidLower = String(currentUserId || "").toLowerCase();
+  const isStudent = !currentUser?.role || currentUser.role === "student";
+  const isWarden =
+    currentUser?.role === "warden" ||
+    ["w001", "w002", "warden123", "gwarden123"].includes(currentUidLower);
+  const isAdmin =
+    currentUser?.role === "admin" ||
+    ["a001", "admin123"].includes(currentUidLower);
+
   const { socket, onlineUsers, isConnected } = useSocket();
 
   const [conversations, setConversations] = useState([]);
@@ -493,7 +517,7 @@ function ChatPage() {
 
   return (
     <AppShell title="Direct Chat" breadcrumb={["Chat"]}>
-      <div className="flex h-[calc(100vh-12rem)] min-h-[500px] overflow-hidden rounded-2xl border bg-card shadow-soft">
+      <div className="flex h-[calc(100dvh-14rem)] sm:h-[calc(100vh-12rem)] min-h-[440px] sm:min-h-[520px] overflow-hidden rounded-2xl border bg-card shadow-soft">
         {/* LEFT SIDEBAR: Conversations List */}
         <div
           className={cn(
@@ -502,11 +526,11 @@ function ChatPage() {
           )}
         >
           {/* Sidebar Header */}
-          <div className="p-4 border-b space-y-3">
+          <div className="p-3 sm:p-4 border-b space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MessageSquare className="size-5 text-primary" />
-                <h2 className="font-bold text-base">Messages</h2>
+                <h2 className="font-bold text-base">{isStudent ? "Authority Chat" : "Messages"}</h2>
               </div>
               <Button
                 size="sm"
@@ -518,7 +542,7 @@ function ChatPage() {
                 }}
               >
                 {showUserSearch ? <ArrowLeft className="size-3.5" /> : <UserPlus className="size-3.5" />}
-                {showUserSearch ? "Back" : "New Chat"}
+                {showUserSearch ? "Back" : isStudent ? "Contact Staff" : "New Chat"}
               </Button>
             </div>
 
@@ -530,15 +554,25 @@ function ChatPage() {
 
             {/* Search Input */}
             {showUserSearch && (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search student, warden or reg no..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9 text-xs rounded-xl"
-                  autoFocus
-                />
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    placeholder={isStudent ? "Search warden or admin..." : "Search student, warden or reg no..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-9 text-xs rounded-xl"
+                    autoFocus
+                  />
+                </div>
+                {isStudent && (
+                  <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-[11px] flex items-start gap-1.5 leading-snug">
+                    <ShieldCheck className="size-3.5 shrink-0 mt-0.5 text-blue-500" />
+                    <span>
+                      Students can only message <strong>Hostel Wardens</strong> and <strong>Administrators</strong>.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -549,33 +583,43 @@ function ChatPage() {
               // Search Results for New Chat
               <div className="space-y-1">
                 <p className="px-3 text-[11px] font-bold tracking-wider text-muted-foreground uppercase py-1">
-                  Available Contacts
+                  {isStudent ? "Hostel Authorities" : "Available Contacts"}
                 </p>
                 {isSearching ? (
-                  <p className="px-3 py-4 text-xs text-muted-foreground text-center">Searching users...</p>
+                  <p className="px-3 py-4 text-xs text-muted-foreground text-center">Searching...</p>
                 ) : searchResults.length > 0 ? (
-                  searchResults.map((user) => (
-                    <button
-                      key={user.id || user.regNo}
-                      onClick={() => handleSelectUser(user.id || user.regNo)}
-                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-accent transition-colors text-left"
-                    >
-                      <div className="relative shrink-0">
-                        <img src={user.avatar} alt="" className="size-10 rounded-full object-cover border" />
-                        {onlineUsers.includes(user.id || user.regNo) && (
-                          <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-background" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold truncate">{user.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {user.dept || user.department || user.role} {user.regNo ? `· ${user.regNo}` : ""}
-                        </p>
-                      </div>
-                    </button>
-                  ))
+                  searchResults.map((user) => {
+                    const badge = getContactRoleBadge(user);
+                    return (
+                      <button
+                        key={user.id || user.regNo}
+                        onClick={() => handleSelectUser(user.id || user.regNo)}
+                        className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-accent transition-colors text-left"
+                      >
+                        <div className="relative shrink-0">
+                          <img src={user.avatar} alt="" className="size-10 rounded-full object-cover border" />
+                          {onlineUsers.includes(user.id || user.regNo) && (
+                            <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-background" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-semibold truncate">{user.name}</p>
+                            <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none rounded shrink-0", badge.className)}>
+                              {badge.label}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {user.dept || user.department || user.role} {user.regNo ? `· ${user.regNo}` : ""}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })
                 ) : (
-                  <p className="px-3 py-4 text-xs text-muted-foreground text-center">No users found.</p>
+                  <p className="px-3 py-4 text-xs text-muted-foreground text-center">
+                    {isStudent ? "No wardens or administrators found." : "No contacts found."}
+                  </p>
                 )}
               </div>
             ) : (
@@ -589,6 +633,7 @@ function ChatPage() {
                     const recId = rec.id || rec.regNo;
                     const isOnline = onlineUsers.includes(recId);
                     const isActive = activeConversation?._id === conv._id;
+                    const badge = getContactRoleBadge(rec);
 
                     return (
                       <button
@@ -614,7 +659,12 @@ function ChatPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-sm font-semibold truncate text-foreground">{rec.name || "User"}</p>
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <p className="text-sm font-semibold truncate text-foreground">{rec.name || "User"}</p>
+                              <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none rounded shrink-0", badge.className)}>
+                                {badge.label}
+                              </Badge>
+                            </div>
                             {conv.updatedAt && (
                               <span className="text-[10px] text-muted-foreground shrink-0">
                                 {new Date(conv.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -644,7 +694,7 @@ function ChatPage() {
                       onClick={() => setShowUserSearch(true)}
                       className="rounded-xl text-xs"
                     >
-                      Start a chat
+                      {isStudent ? "Contact Warden or Admin" : "Start a chat"}
                     </Button>
                   </div>
                 )}
@@ -663,12 +713,12 @@ function ChatPage() {
           {activeConversation ? (
             <>
               {/* Chat Header */}
-              <div className="px-4 py-3 border-b flex items-center justify-between bg-card/80 backdrop-blur-sm">
-                <div className="flex items-center gap-3">
+              <div className="px-3 py-2.5 sm:px-4 sm:py-3 border-b flex items-center justify-between bg-card/80 backdrop-blur-sm gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="md:hidden size-8"
+                    className="md:hidden size-8 shrink-0"
                     onClick={() => setActiveConversation(null)}
                   >
                     <ArrowLeft className="size-4" />
@@ -677,31 +727,36 @@ function ChatPage() {
                     <img
                       src={recipient.avatar || "https://i.pravatar.cc/160?img=1"}
                       alt=""
-                      className="size-10 rounded-full object-cover border"
+                      className="size-9 sm:size-10 rounded-full object-cover border"
                     />
                     {isRecipientOnline && (
                       <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-background" />
                     )}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-sm leading-snug">{recipient.name || "Chat Partner"}</h3>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                      <span>{recipient.dept || recipient.department || recipient.role}</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm leading-snug truncate max-w-[150px] sm:max-w-xs">{recipient.name || "Chat Partner"}</h3>
+                      <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none rounded shrink-0", getContactRoleBadge(recipient).className)}>
+                        {getContactRoleBadge(recipient).label}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
+                      <span className="truncate max-w-[100px] sm:max-w-none">{recipient.dept || recipient.department || recipient.role}</span>
                       <span>·</span>
-                      <span className={cn("font-medium", isRecipientOnline ? "text-emerald-500" : "text-muted-foreground")}>
+                      <span className={cn("font-medium shrink-0", isRecipientOnline ? "text-emerald-500" : "text-muted-foreground")}>
                         {isRecipientOnline ? "Online" : "Offline"}
                       </span>
                     </p>
                   </div>
                 </div>
 
-                <Badge variant="outline" className="text-xs font-mono rounded-lg">
+                <Badge variant="outline" className="text-xs font-mono rounded-lg hidden sm:inline-flex shrink-0">
                   {recipient.regNo || recipient.id}
                 </Badge>
               </div>
 
               {/* Chat Messages Body */}
-              <ScrollArea className="flex-1 p-4">
+              <ScrollArea className="flex-1 p-3 sm:p-4">
                 {loadingMessages ? (
                   <div className="flex items-center justify-center h-48 text-xs text-muted-foreground">
                     Loading message history...
@@ -714,11 +769,11 @@ function ChatPage() {
                       return (
                         <div
                           key={msg._id || msg.createdAt}
-                          className={cn("flex flex-col max-w-[80%] md:max-w-[70%]", isMe ? "ml-auto items-end" : "mr-auto items-start")}
+                          className={cn("flex flex-col max-w-[88%] sm:max-w-[70%]", isMe ? "ml-auto items-end" : "mr-auto items-start")}
                         >
                           <div
                             className={cn(
-                              "px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed shadow-xs",
+                              "px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs",
                               isMe
                                 ? "bg-primary text-primary-foreground rounded-br-xs"
                                 : "bg-muted text-foreground rounded-bl-xs"
@@ -796,12 +851,91 @@ function ChatPage() {
                 </Button>
               </form>
             </>
+          ) : isStudent ? (
+            <div className="text-center p-6 sm:p-8 max-w-md w-full">
+              <div className="size-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+                <ShieldCheck className="size-7" />
+              </div>
+              <h3 className="font-bold text-lg text-foreground">Hostel Authority Helpdesk</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-5 leading-relaxed">
+                Connect directly with Hostel Wardens and Administrators for official approvals, room queries, or assistance.
+              </p>
+
+              <div className="space-y-2 text-left">
+                <p className="text-[11px] font-bold tracking-wider uppercase text-muted-foreground px-1">
+                  Hostel Officials (Quick Connect)
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectUser("W001")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/60 hover:border-primary/40 transition-all group"
+                >
+                  <img
+                    src="https://i.pravatar.cc/160?img=60"
+                    alt=""
+                    className="size-10 rounded-full border object-cover shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold truncate group-hover:text-primary">Boys Hostel Warden</p>
+                      <Badge className="text-[9px] px-1 py-0 h-4 bg-blue-600/90 text-white border-transparent">
+                        Warden
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">Mr. K. Kumar · Boys Hostel (W001)</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectUser("W002")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/60 hover:border-primary/40 transition-all group"
+                >
+                  <img
+                    src="https://i.pravatar.cc/160?img=47"
+                    alt=""
+                    className="size-10 rounded-full border object-cover shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold truncate group-hover:text-primary">Girls Hostel Warden</p>
+                      <Badge className="text-[9px] px-1 py-0 h-4 bg-blue-600/90 text-white border-transparent">
+                        Warden
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">Mrs. S. Meenakshi · Girls Hostel (W002)</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectUser("A001")}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/60 hover:border-primary/40 transition-all group"
+                >
+                  <img
+                    src="https://i.pravatar.cc/160?img=68"
+                    alt=""
+                    className="size-10 rounded-full border object-cover shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold truncate group-hover:text-primary">System Administrator</p>
+                      <Badge className="text-[9px] px-1 py-0 h-4 bg-purple-600/90 text-white border-transparent">
+                        Admin
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">Mr. R. Arun · IT & Operations (A001)</p>
+                  </div>
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="text-center p-8 text-muted-foreground max-w-sm">
               <MessageSquare className="size-12 mx-auto text-muted-foreground/40 mb-3" />
-              <h3 className="font-bold text-lg text-foreground">BIT Direct Chat</h3>
+              <h3 className="font-bold text-lg text-foreground">Hostel Communication Desk</h3>
               <p className="text-xs mt-1">
-                Select a conversation from the sidebar or click "New Chat" to search and message roommates, wardens, or classmates.
+                Select a conversation from the sidebar or click &ldquo;New Chat&rdquo; to connect with students, wardens, or administrators.
               </p>
             </div>
           )}

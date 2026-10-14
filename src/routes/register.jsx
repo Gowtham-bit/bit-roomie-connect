@@ -101,7 +101,7 @@ function RegisterPage() {
   });
 
   return (
-    <div className="gradient-hero min-h-screen px-4 py-12">
+    <div className="gradient-hero min-h-[100dvh] px-3 sm:px-4 py-8 sm:py-12">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -120,10 +120,10 @@ function RegisterPage() {
           <span className="font-display font-extrabold">BIT Hostel Portal</span>
         </Link>
 
-        <div className="glass rounded-3xl p-6 shadow-elegant sm:p-9">
-          <div className="flex items-center justify-between">
+        <div className="glass rounded-2xl sm:rounded-3xl p-4 sm:p-9 shadow-elegant">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-extrabold">Student registration</h1>
+              <h1 className="text-xl sm:text-2xl font-extrabold">Student registration</h1>
               <p className="mt-1 text-xs text-muted-foreground">
                 Step {step} of 2: {step === 1 ? "Account Credentials" : "Hostel Compatibility Questionnaire"}
               </p>
@@ -305,11 +305,11 @@ function RegisterPage() {
                   </Field>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <Button type="button" variant="hero" size="lg" onClick={handleNextStep}>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                  <Button type="button" variant="hero" size="lg" onClick={handleNextStep} className="w-full sm:w-auto">
                     Next: Compatibility Questions &rarr;
                   </Button>
-                  <Button asChild variant="ghost">
+                  <Button asChild variant="ghost" className="w-full sm:w-auto text-center">
                     <Link to="/login">Already registered? Login</Link>
                   </Button>
                 </div>
@@ -392,11 +392,11 @@ function RegisterPage() {
                   </Field>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
                     &larr; Back to Account Details
                   </Button>
-                  <Button type="submit" variant="hero" size="lg" disabled={isSubmitting}>
+                  <Button type="submit" variant="hero" size="lg" disabled={isSubmitting} className="w-full sm:w-auto">
                     {isSubmitting && <Loader2 className="size-4 animate-spin" />} Complete & Register
                   </Button>
                 </div>

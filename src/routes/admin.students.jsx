@@ -40,8 +40,8 @@ function StudentManagementPage() {
 
   return (
     <AppShell title="Student Management" breadcrumb={["Admin", "Students"]}>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-4 shadow-soft">
-        <div className="relative min-w-64 flex-1">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-2xl border bg-card p-3.5 sm:p-4 shadow-soft">
+        <div className="relative w-full sm:w-auto sm:min-w-64 flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
@@ -51,14 +51,14 @@ function StudentManagementPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Filter className="size-3.5" /> Filter:
           </div>
           <select
             value={genderFilter}
             onChange={(e) => setGenderFilter(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 text-xs font-semibold"
+            className="h-9 rounded-xl border border-input bg-background px-3 text-xs font-semibold flex-1 sm:flex-initial"
           >
             <option value="All">All Genders</option>
             <option value="Male">Male Only</option>
@@ -67,7 +67,7 @@ function StudentManagementPage() {
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 text-xs font-semibold"
+            className="h-9 rounded-xl border border-input bg-background px-3 text-xs font-semibold flex-1 sm:flex-initial"
           >
             <option value="All">All Years</option>
             <option value="1">Year 1</option>
@@ -79,6 +79,7 @@ function StudentManagementPage() {
             variant="outline"
             size="sm"
             onClick={() => toast.success("Exported student list as CSV")}
+            className="flex-1 sm:flex-initial"
           >
             <Download className="mr-1.5 size-3.5" /> Export
           </Button>
@@ -87,7 +88,7 @@ function StudentManagementPage() {
 
       <div className="overflow-hidden rounded-2xl border bg-card shadow-soft">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[750px] text-left text-sm">
             <thead className="border-b bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">Student</th>

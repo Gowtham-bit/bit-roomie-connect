@@ -76,10 +76,10 @@ export function RoomFloorPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-6 overflow-hidden sm:rounded-2xl">
+      <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[90dvh] flex flex-col p-4 sm:p-6 overflow-hidden sm:rounded-2xl">
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-foreground">
+            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2 text-foreground">
               <Layers className="size-5 text-primary" /> Floor-by-Floor Room Inspector
             </DialogTitle>
             <Badge variant="outline" className="text-xs px-3 py-1 font-semibold border-primary/30 text-primary">
@@ -93,7 +93,7 @@ export function RoomFloorPickerModal({
 
         {/* Floor Selection Bar */}
         <div className="flex items-center gap-2 overflow-x-auto py-2 border-b">
-          <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
+          <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1 shrink-0">
             <Layers className="size-3.5" /> Floors:
           </span>
           {availableFloors.map((f) => {
@@ -119,26 +119,26 @@ export function RoomFloorPickerModal({
         </div>
 
         {/* Selected Floor Banner */}
-        <div className="flex items-center justify-between bg-muted/30 px-4 py-2 rounded-xl text-xs border my-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-muted/30 px-3 sm:px-4 py-2 rounded-xl text-xs border my-2">
           <span className="font-semibold text-foreground flex items-center gap-1.5">
             <BedDouble className="size-4 text-primary" />
             {getFloorName(activeFloor)} Rooms Overview
           </span>
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <span>Total Rooms: <strong className="text-foreground">{floorStats.total || currentFloorRooms.length}</strong></span>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-muted-foreground">
+            <span>Total: <strong className="text-foreground">{floorStats.total || currentFloorRooms.length}</strong></span>
             <span>Empty: <strong className="text-emerald-600 dark:text-emerald-400">{floorStats.empty}</strong></span>
             <span>Available: <strong className="text-blue-600 dark:text-blue-400">{floorStats.available}</strong></span>
           </div>
         </div>
 
         {/* Floor Rooms Grid */}
-        <div className="flex-1 overflow-y-auto pr-1 py-2 min-h-[320px]">
+        <div className="flex-1 overflow-y-auto pr-1 py-2 min-h-[260px] sm:min-h-[320px]">
           {isLoading ? (
             <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
               Loading floor room layout...
             </div>
           ) : currentFloorRooms.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
               {currentFloorRooms.map((room) => {
                 const isFull = room.occupied >= room.capacity;
                 const isEmpty = room.occupied === 0;
@@ -205,24 +205,25 @@ export function RoomFloorPickerModal({
         </div>
 
         {/* Modal Footer & Confirmation */}
-        <DialogFooter className="border-t pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <DialogFooter className="border-t pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">Chosen Allotment:</span>
+            <span className="text-muted-foreground">Chosen:</span>
             {selectedRoom ? (
               <Badge variant="default" className="text-xs px-2.5 py-1 bg-primary font-bold">
                 Room {selectedRoom} ({hostelName})
               </Badge>
             ) : (
-              <span className="text-muted-foreground italic">Click any available room above to select</span>
+              <span className="text-muted-foreground italic text-[11px]">Click an available room above</span>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
+              className="flex-1 sm:flex-initial"
             >
               Cancel
             </Button>
@@ -232,9 +233,9 @@ export function RoomFloorPickerModal({
               size="sm"
               disabled={!selectedRoom || isSubmitting}
               onClick={handleConfirm}
-              className="px-5 font-bold"
+              className="flex-1 sm:flex-initial font-bold"
             >
-              {isSubmitting ? "Allotting..." : selectedRoom ? `Confirm & Allot Room ${selectedRoom}` : "Select a Room First"}
+              {isSubmitting ? "Allotting..." : selectedRoom ? `Allot Room ${selectedRoom}` : "Select Room"}
             </Button>
           </div>
         </DialogFooter>

@@ -43,7 +43,7 @@ const studentNav = [
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/notifications", label: "Notifications", icon: Bell },
-      { to: "/chat", label: "Direct Chat", icon: MessageSquare },
+      { to: "/chat", label: "Warden & Admin Chat", icon: MessageSquare },
       { to: "/profile", label: "My Profile", icon: UserCircle },
     ],
   },
@@ -88,7 +88,7 @@ const adminNav = [
   {
     group: "Operations",
     items: [
-      { to: "/chat", label: "Support Chat", icon: MessageSquare },
+      { to: "/chat", label: "Portal Chat Desk", icon: MessageSquare },
       { to: "/admin/complaints", label: "Complaint Desk", icon: Wrench },
       { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
       { to: "/admin/reports", label: "Reports", icon: FileBarChart },
@@ -100,7 +100,7 @@ const wardenNav = [
     group: "Warden",
     items: [
       { to: "/warden", label: "Warden Dashboard", icon: LayoutDashboard },
-      { to: "/chat", label: "Student Chat", icon: MessageSquare },
+      { to: "/chat", label: "Hostel Chat Desk", icon: MessageSquare },
       { to: "/admin/complaints", label: "Complaints", icon: Wrench },
       { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
       { to: "/hostels", label: "Occupancy", icon: Building2 },
@@ -218,6 +218,29 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
       </div>
     </div>
   );
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  // Bottom navigation items for quick mobile access based on role
+  const mobileNavItems = activeRole === "admin" ? [
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/admin/allocation", label: "Allot", icon: BedDouble },
+    { to: "/admin/students", label: "Students", icon: Users },
+    { to: "/chat", label: "Chat", icon: MessageSquare },
+    { to: "/profile", label: "Profile", icon: UserCircle },
+  ] : activeRole === "warden" ? [
+    { to: "/warden", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/chat", label: "Chat", icon: MessageSquare },
+    { to: "/admin/complaints", label: "Complaints", icon: Wrench },
+    { to: "/admin/attendance", label: "Attendance", icon: CalendarCheck },
+    { to: "/profile", label: "Profile", icon: UserCircle },
+  ] : [
+    { to: "/dashboard", label: "Home", icon: LayoutDashboard },
+    { to: "/roommates", label: "Match", icon: Heart },
+    { to: "/apply", label: "Apply", icon: ClipboardList },
+    { to: "/chat", label: "Chat", icon: MessageSquare },
+    { to: "/profile", label: "Profile", icon: UserCircle },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r bg-sidebar lg:block">
@@ -235,17 +258,17 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
               className="fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm lg:hidden"
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: -300 }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: -300 }}
               transition={{ type: "spring", damping: 26, stiffness: 240 }}
-              className="fixed inset-y-0 left-0 z-50 w-64 border-r bg-sidebar lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] border-r bg-sidebar shadow-2xl lg:hidden"
             >
               <Button
                 variant="ghost"
                 size="icon"
                 aria-label="Close menu"
-                className="absolute top-4 right-2"
+                className="absolute top-4 right-2 size-8"
                 onClick={() => setOpen(false)}
               >
                 <X className="size-4" />
@@ -257,61 +280,83 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
       </AnimatePresence>
 
       <div className="lg:pl-64">
-        <header className="glass sticky top-0 z-30 border-b px-4 py-3">
-          <div className="flex items-center gap-3">
+        <header className="glass sticky top-0 z-30 border-b px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="size-9 lg:hidden shrink-0"
               aria-label="Open menu"
               onClick={() => setOpen(true)}
             >
               <Menu className="size-5" />
             </Button>
 
+            {/* Mobile Branding Logo for small screens */}
+            <div className="flex items-center gap-2 lg:hidden">
+              <Link to="/dashboard" className="flex items-center gap-1.5">
+                <img src="/bit-logo.png" alt="BIT" className="h-7 w-auto object-contain rounded-md" />
+                <span className="font-display text-xs font-bold sm:hidden">BIT Portal</span>
+              </Link>
+            </div>
+
+            {/* Desktop Search Bar */}
             <div className="relative hidden max-w-sm flex-1 md:block">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search students, rooms, complaints…"
-                className="pl-9"
+                className="pl-9 h-9 text-xs sm:text-sm rounded-xl"
                 aria-label="Global search"
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
+              {/* Mobile Search Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 sm:size-9 md:hidden"
+                aria-label="Toggle search"
+                onClick={() => setMobileSearchOpen((prev) => !prev)}
+              >
+                <Search className="size-4" />
+              </Button>
+
               <ThemeToggle />
+
               <Button
                 asChild
                 variant="ghost"
                 size="icon"
-                className="relative"
+                className="relative size-8 sm:size-9"
                 aria-label="Notifications"
               >
                 <Link to="/notifications">
-                  <Bell className="size-5" />
+                  <Bell className="size-4 sm:size-5" />
                   {unread > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                    <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
                 </Link>
               </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="ml-1 flex items-center gap-2 rounded-full border p-1 pr-3 transition-colors hover:bg-muted"
+                    className="ml-1 flex items-center gap-2 rounded-full border p-1 sm:pr-3 transition-colors hover:bg-muted"
                     aria-label="Account menu"
                   >
-                    <img src={avatarUrl} alt="" className="size-7 rounded-full object-cover" />
-                    <span className="hidden text-sm font-medium sm:block">
+                    <img src={avatarUrl} alt="" className="size-7 rounded-full object-cover shrink-0" />
+                    <span className="hidden text-xs sm:text-sm font-medium sm:block max-w-[100px] truncate">
                       {displayName.split(" ")[0]}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
-                    <p className="text-sm font-semibold">{displayName}</p>
-                    <p className="text-xs font-normal text-muted-foreground">
+                    <p className="text-sm font-semibold truncate">{displayName}</p>
+                    <p className="text-xs font-normal text-muted-foreground truncate">
                       {currentUser.email || displaySubtext}
                     </p>
                   </DropdownMenuLabel>
@@ -344,39 +389,95 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
               </DropdownMenu>
             </div>
           </div>
+
+          {/* Expandable Mobile Search Bar */}
+          <AnimatePresence>
+            {mobileSearchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden pt-2.5 md:hidden"
+              >
+                <div className="relative">
+                  <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search students, rooms, complaints…"
+                    className="pl-9 h-9 text-xs rounded-xl w-full"
+                    autoFocus
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <main className="px-3.5 py-4 sm:px-6 sm:py-6 lg:px-8 pb-24 lg:pb-10 max-w-full overflow-x-hidden">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="mx-auto max-w-7xl"
           >
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-              <div>
+            <div className="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div className="min-w-0">
                 <nav
                   aria-label="Breadcrumb"
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground truncate"
                 >
                   <Link to="/dashboard" className="hover:text-primary">
                     Home
                   </Link>
                   {(breadcrumb ?? [title]).map((b) => (
-                    <span key={b} className="flex items-center gap-1.5">
+                    <span key={b} className="flex items-center gap-1.5 truncate">
                       <span>/</span>
-                      <span className="text-foreground">{b}</span>
+                      <span className="text-foreground truncate">{b}</span>
                     </span>
                   ))}
                 </nav>
-                <h1 className="mt-1.5 text-2xl font-extrabold sm:text-3xl">{title}</h1>
+                <h1 className="mt-1 text-xl font-extrabold sm:text-2xl md:text-3xl break-words">{title}</h1>
               </div>
-              {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+              {actions && <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">{actions}</div>}
             </div>
             {children}
           </motion.div>
         </main>
       </div>
+
+      {/* Modern Mobile Bottom Navigation Bar */}
+      <nav aria-label="Mobile Navigation" className="fixed bottom-0 inset-x-0 z-30 border-t bg-card/95 backdrop-blur-md px-2 py-1.5 shadow-lg lg:hidden">
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {mobileNavItems.map((item) => {
+            const active = pathname === item.to || (item.to !== "/dashboard" && item.to !== "/admin" && pathname.startsWith(item.to));
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold transition-all relative",
+                  active
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="mobile-nav-active"
+                    className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-primary"
+                  />
+                )}
+                <div className="relative">
+                  <item.icon className={cn("size-5 transition-transform", active && "scale-110")} />
+                  {item.label === "Chat" && unread > 0 && (
+                    <span className="absolute -top-1 -right-1.5 size-2 rounded-full bg-destructive" />
+                  )}
+                </div>
+                <span className="mt-0.5 leading-tight">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

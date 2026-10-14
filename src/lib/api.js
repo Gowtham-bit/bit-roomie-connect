@@ -367,13 +367,23 @@ export async function apiCreateConversation(targetId) {
     method: "POST",
     body: JSON.stringify({ targetId }),
   });
+  if (res && res.error) {
+    return { error: res.error };
+  }
   if (res && !res.error) return res;
 
   // Fallback local conversation creation if backend is offline/unreachable
-  const mockTarget = mockStudents.find((s) => s.id === targetId || s.regNo === targetId) || {
+  const mockTarget = {
     id: targetId,
     regNo: targetId,
-    name: targetId === "W001" ? "Boys Hostel Warden" : targetId === "W002" ? "Girls Hostel Warden" : targetId,
+    name:
+      targetId === "W001" || targetId === "warden123"
+        ? "Boys Hostel Warden"
+        : targetId === "W002" || targetId === "gwarden123"
+        ? "Girls Hostel Warden"
+        : targetId === "A001" || targetId === "admin123"
+        ? "System Administrator"
+        : targetId,
     avatar: "https://i.pravatar.cc/160?img=12",
     dept: "Hostel Admin",
   };
@@ -395,26 +405,48 @@ export async function apiGetMessages(conversationId) {
 
 export async function apiSearchUsers(query = "") {
   const data = await request(`/chat/users?query=${encodeURIComponent(query)}`);
-  if (data && !data.error && Array.isArray(data) && data.length > 0) return data;
+  if (data && !data.error && Array.isArray(data)) return data;
 
-  // Fallback to searching mockStudents and Wardens
+  // Fallback if backend server unreachable or in offline preview
+  const user = getCurrentUser() || {};
+  const currentUid = (user.id || user.regNo || "").toLowerCase();
+  const isAuth =
+    user.role === "admin" ||
+    user.role === "warden" ||
+    ["a001", "admin123", "w001", "warden123", "w002", "gwarden123"].includes(currentUid);
+
   const q = query.toLowerCase().trim();
-  const wardens = [
-    { id: "W001", regNo: "warden123", name: "Boys Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=60", dept: "Hostel Admin" },
-    { id: "W002", regNo: "gwarden123", name: "Girls Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=47", dept: "Hostel Admin" },
-  ];
+  const authorities = [
+    { id: "W001", regNo: "warden123", name: "Boys Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=60", dept: "Boys Hostel Administration", title: "Mr. K. Kumar (Boys Warden)" },
+    { id: "W002", regNo: "gwarden123", name: "Girls Hostel Warden", role: "warden", avatar: "https://i.pravatar.cc/160?img=47", dept: "Girls Hostel Administration", title: "Mrs. S. Meenakshi (Girls Warden)" },
+    { id: "A001", regNo: "admin123", name: "System Administrator", role: "admin", avatar: "https://i.pravatar.cc/160?img=68", dept: "Hostel IT & Operations", title: "Mr. R. Arun (Chief Administrator)" },
+  ].filter((a) => a.id.toLowerCase() !== currentUid && a.regNo.toLowerCase() !== currentUid);
 
-  const matchedWardens = wardens.filter((w) => !q || w.name.toLowerCase().includes(q) || w.dept.toLowerCase().includes(q));
+  const matchedAuthorities = authorities.filter(
+    (w) =>
+      !q ||
+      w.name.toLowerCase().includes(q) ||
+      w.dept.toLowerCase().includes(q) ||
+      (w.title && w.title.toLowerCase().includes(q))
+  );
+
+  // If user is a student, ONLY authorities are permitted
+  if (!isAuth) {
+    return matchedAuthorities;
+  }
+
   const matchedStudents = mockStudents
     .filter(
       (s) =>
-        !q ||
-        s.name.toLowerCase().includes(q) ||
-        s.regNo.toLowerCase().includes(q) ||
-        (s.dept || s.department || "").toLowerCase().includes(q)
+        s.id.toLowerCase() !== currentUid &&
+        s.regNo.toLowerCase() !== currentUid &&
+        (!q ||
+          s.name.toLowerCase().includes(q) ||
+          s.regNo.toLowerCase().includes(q) ||
+          (s.dept || s.department || "").toLowerCase().includes(q))
     )
     .slice(0, 20);
 
-  return [...matchedWardens, ...matchedStudents];
+  return [...matchedAuthorities, ...matchedStudents];
 }
 

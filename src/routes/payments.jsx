@@ -44,22 +44,22 @@ function Page() {
         </Button>
       }
     >
-      <div className="mb-5 grid gap-4 sm:grid-cols-3">
+      <div className="mb-5 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
         {[
           ["Pending amount", pending],
           ["Paid this year", paid],
           ["Transactions", mine.length],
         ].map(([l, v], i) => (
-          <div key={l} className="rounded-2xl border bg-card p-5 shadow-soft">
-            <p className="text-sm text-muted-foreground">{l}</p>
-            <p className="font-display mt-2 text-3xl font-extrabold">
+          <div key={l} className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
+            <p className="text-xs sm:text-sm text-muted-foreground">{l}</p>
+            <p className="font-display mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-extrabold">
               {i === 2 ? v : `₹${v.toLocaleString("en-IN")}`}
             </p>
           </div>
         ))}
       </div>
       <section className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-muted/60 text-left text-xs uppercase text-muted-foreground">
             <tr>
               {["Receipt", "Term", "Amount", "Paid", "Mode", "Date", "Status", ""].map((h) => (

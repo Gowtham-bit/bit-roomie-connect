@@ -188,68 +188,68 @@ function Page() {
           </section>
 
           {/* Section 3: Roommate Compatibility Profile */}
-          <section className="rounded-2xl border bg-card p-6 shadow-soft">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+          <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" /> Roommate Compatibility Profile
+                <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
+                  <Sparkles className="size-5 text-primary shrink-0" /> Roommate Compatibility Profile
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Your lifestyle answers are saved and matched with prospective room partners in target hostel blocks.
                 </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => navigate({ to: "/roommates" })}>
+              <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto shrink-0" onClick={() => navigate({ to: "/roommates" })}>
                 Retake Questionnaire
               </Button>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-3 text-xs">
-              <div className="rounded-xl border bg-muted/40 p-3">
+            <div className="mt-4 grid gap-2.5 sm:gap-3 grid-cols-2 sm:grid-cols-3 text-xs">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Sleep Schedule</span>
-                <p className="font-bold text-sm mt-0.5">{student.traits?.sleep || "10 PM – 12 AM"}</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5">{student.traits?.sleep || "10 PM – 12 AM"}</p>
               </div>
-              <div className="rounded-xl border bg-muted/40 p-3">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Cleanliness Standard</span>
-                <p className="font-bold text-sm mt-0.5">{String(student.traits?.cleanliness || "Very Clean")}</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5">{String(student.traits?.cleanliness || "Very Clean")}</p>
               </div>
-              <div className="rounded-xl border bg-muted/40 p-3">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Food Preference</span>
-                <p className="font-bold text-sm mt-0.5">{student.traits?.food || "Non-Veg"}</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5">{student.traits?.food || "Non-Veg"}</p>
               </div>
-              <div className="rounded-xl border bg-muted/40 p-3">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Personality Type</span>
-                <p className="font-bold text-sm mt-0.5">{student.traits?.personality || "Ambivert"}</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5">{student.traits?.personality || "Ambivert"}</p>
               </div>
-              <div className="rounded-xl border bg-muted/40 p-3">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Noise Tolerance</span>
-                <p className="font-bold text-sm mt-0.5">{student.traits?.noise || "Moderate"}</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5">{student.traits?.noise || "Moderate"}</p>
               </div>
-              <div className="rounded-xl border bg-muted/40 p-3">
+              <div className="rounded-xl border bg-muted/40 p-2.5 sm:p-3">
                 <span className="text-muted-foreground">Hometown & Language</span>
-                <p className="font-bold text-sm mt-0.5">{student.hometown || "Campus"} ({student.language || "Tamil"})</p>
+                <p className="font-bold text-xs sm:text-sm mt-0.5 truncate">{student.hometown || "Campus"} ({student.language || "Tamil"})</p>
               </div>
             </div>
 
             {/* Top Compatible Roommates Preview */}
             <div className="mt-5 border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   Top Compatible Roommates in Preferred {requiredType} Hostels
                 </h3>
                 <span className="text-xs text-primary font-semibold">Live Match Calculator</span>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2">
                 {(Array.isArray(roommateMatches) ? roommateMatches : []).slice(0, 4).map((match) => (
-                  <div key={match.regNo} className="flex items-center justify-between rounded-xl border bg-card p-3 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <img src={match.avatar} alt={match.name} className="size-10 rounded-xl object-cover" />
-                      <div>
-                        <p className="text-xs font-bold">{match.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{match.dept} · {match.hometown || "Campus"}</p>
+                  <div key={match.regNo} className="flex items-center justify-between rounded-xl border bg-card p-2.5 sm:p-3 shadow-xs gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img src={match.avatar} alt={match.name} className="size-9 sm:size-10 rounded-xl object-cover shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate">{match.name}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{match.dept} · {match.hometown || "Campus"}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="hero" className="text-[11px] py-0.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge variant="hero" className="text-[10px] sm:text-[11px] py-0.5 px-2">
                         {match.compatibility}%
                       </Badge>
                       <Button size="icon" variant="ghost" className="size-7" type="button" onClick={() => setSelectedMatch(match)}>
@@ -263,11 +263,11 @@ function Page() {
           </section>
 
           {/* Section 4: Target Hostel & Preferences */}
-          <section className="rounded-2xl border bg-card p-6 shadow-soft space-y-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <BedDouble className="size-5 text-primary" /> Target Hostel & Room Preferences
+          <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft space-y-4">
+            <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
+              <BedDouble className="size-5 text-primary shrink-0" /> Target Hostel & Room Preferences
             </h2>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-3.5 sm:grid-cols-3">
               <div className="space-y-2 sm:col-span-3">
                 <Label>Target / Preferred Hostel Block</Label>
                 <select
@@ -322,25 +322,26 @@ function Page() {
               />
             </div>
 
-            <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed p-4 text-sm hover:border-primary/50 transition-colors">
-              <span>Upload Supporting Proof (Medical Certificate / Recommendation)</span>
-              <span className="text-xs font-semibold text-primary">Choose File</span>
+            <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed p-3 sm:p-4 text-xs sm:text-sm hover:border-primary/50 transition-colors gap-2">
+              <span className="truncate">Upload Supporting Proof (Medical Certificate / Recommendation)</span>
+              <span className="text-xs font-semibold text-primary shrink-0">Choose File</span>
               <input type="file" className="sr-only" />
             </label>
           </section>
 
           {/* Section 5: Application Submission */}
-          <section className="rounded-2xl border bg-card p-6 shadow-soft">
+          <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
             <h2 className="text-sm font-bold">Request Submission & Verification</h2>
             <Progress value={90} className="mt-3" />
             <p className="mt-2 text-xs text-muted-foreground">Ready for Warden Verification & Admin Room Allotment.</p>
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <Button type="submit" variant="hero" disabled={submitRoomChangeMutation.isPending} className="flex-1">
                 {submitRoomChangeMutation.isPending ? "Submitting..." : "Submit Room Change Request"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
+                className="w-full sm:w-auto"
                 onClick={() => toast.success("Draft Saved", { description: "Your room change draft has been saved." })}
               >
                 Save Draft
@@ -350,7 +351,7 @@ function Page() {
         </form>
 
         {/* Right Column: Room Change Request Status Tracker */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft h-fit">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft h-fit">
           <h2 className="text-sm font-bold">Room Change Request Status Tracker</h2>
           {latestRequest ? (
             <div className="mt-4 rounded-xl bg-muted/50 p-4 space-y-2 border">

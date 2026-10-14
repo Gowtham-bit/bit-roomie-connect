@@ -49,16 +49,16 @@ function HostelDetail() {
             <img
               src={hostel.image}
               alt={hostel.name}
-              className="h-56 w-full object-cover"
+              className="h-44 sm:h-56 w-full object-cover"
               loading="lazy"
             />
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{hostel.type} hostel</Badge>
                 <Badge variant="outline">{hostel.floors} floors</Badge>
                 <Badge variant="outline">Warden {hostel.warden}</Badge>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4">
                 <Metric icon={DoorOpen} label="Total rooms" value={hostel.totalRooms} />
                 <Metric icon={Users} label="Capacity" value={hostel.capacity} />
                 <Metric icon={BedDouble} label="Occupied" value={hostel.occupied} />
@@ -68,7 +68,7 @@ function HostelDetail() {
                   value={hostel.capacity - hostel.occupied}
                 />
               </div>
-              <div className="mt-5">
+              <div className="mt-4 sm:mt-5">
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Block occupancy</span>
                   <span className="font-semibold text-foreground">{pct}%</span>
@@ -78,9 +78,9 @@ function HostelDetail() {
             </div>
           </div>
 
-          <div className="rounded-2xl border bg-card p-5 shadow-soft">
-            <h2 className="text-lg font-bold">Rooms in this block</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
+            <h2 className="text-base sm:text-lg font-bold">Rooms in this block</h2>
+            <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {hostelRooms.map((r) => {
                 const free = r.capacity - r.occupied;
                 return (

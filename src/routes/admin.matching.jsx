@@ -34,14 +34,14 @@ function RoommateMatchingPage() {
       title="Roommate Matching & Compatibility Desk"
       breadcrumb={["Admin", "Matching"]}
       actions={
-        <Button variant="hero" onClick={handleAutoMatch}>
+        <Button variant="hero" onClick={handleAutoMatch} className="w-full sm:w-auto">
           <Sparkles className="mr-1.5 size-4" /> Run Auto-Match Algorithm
         </Button>
       }
     >
       <div className="grid gap-5">
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <Heart className="size-5 text-primary" /> High-Compatibility Student Pairings
           </h2>
           <p className="text-xs text-muted-foreground mt-1">

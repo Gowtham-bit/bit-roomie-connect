@@ -81,46 +81,48 @@ function HostelsPage() {
         </Button>
       }
     >
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft">
-        <div className="relative min-w-56 flex-1">
+      <div className="mb-6 flex flex-wrap items-center gap-2.5 sm:gap-3 rounded-2xl border bg-card p-3 sm:p-4 shadow-soft">
+        <div className="relative w-full sm:w-auto min-w-0 sm:min-w-56 flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search hostel block"
-            className="pl-9"
+            className="pl-9 h-9 text-xs sm:text-sm rounded-xl"
             aria-label="Search hostels"
           />
         </div>
-        {isAdmin ? (
-          <div className="flex gap-1 rounded-xl bg-muted p-1">
-            {["All", "Boys", "Girls"].map((t) => (
-              <button
-                key={t}
-                onClick={() => setType(t)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}
-              >
-                {t}
-              </button>
-            ))}
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+          {isAdmin ? (
+            <div className="flex gap-1 rounded-xl bg-muted p-1">
+              {["All", "Boys", "Girls"].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors ${type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center rounded-xl bg-muted px-3 py-1.5 text-xs font-semibold text-primary">
+              {enforcedType === "Girls" ? "Girls Hostels Only" : "Boys Hostels Only"}
+            </div>
+          )}
+          <div className="flex items-center gap-2 ml-auto sm:ml-0">
+            <Filter className="size-4 text-muted-foreground" />
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="Sort hostels"
+              className="h-9 rounded-xl border border-input bg-background px-3 text-xs sm:text-sm"
+            >
+              <option value="availability">Most available</option>
+              <option value="capacity">Largest capacity</option>
+              <option value="name">Name A–Z</option>
+            </select>
           </div>
-        ) : (
-          <div className="flex items-center rounded-xl bg-muted px-3 py-1.5 text-xs font-semibold text-primary">
-            {enforcedType === "Girls" ? "Girls Hostels Only" : "Boys Hostels Only"}
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Filter className="size-4 text-muted-foreground" />
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            aria-label="Sort hostels"
-            className="h-9 rounded-xl border border-input bg-background px-3 text-sm"
-          >
-            <option value="availability">Most available</option>
-            <option value="capacity">Largest capacity</option>
-            <option value="name">Name A–Z</option>
-          </select>
         </div>
       </div>
 

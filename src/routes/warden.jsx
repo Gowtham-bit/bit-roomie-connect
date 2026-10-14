@@ -127,22 +127,22 @@ function WardenDashboard() {
         </Badge>
       }
     >
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Shield}
-          title="Assigned Jurisdiction"
+          title="Jurisdiction"
           value={`${wardenType} Hostels`}
-          trend={`${isGirlsWarden ? '7 Girls' : '6 Boys'} Hostel Blocks`}
+          trend={`${isGirlsWarden ? '7 Girls' : '6 Boys'} Blocks`}
         />
         <StatCard
           icon={ClipboardList}
-          title="Pending Applications"
+          title="Applications"
           value={apps.filter((a) => a.status === "Pending").length.toString()}
           trend="Awaiting review"
         />
         <StatCard
           icon={Building2}
-          title="Room Change Requests"
+          title="Room Changes"
           value={roomChanges.filter((r) => r.status === "Pending").length.toString()}
           trend="In queue"
         />
@@ -154,33 +154,33 @@ function WardenDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
         {/* Hostel Applications Review */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <ClipboardList className="size-5 text-primary" /> {wardenType} Hostel Applications
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
+            <ClipboardList className="size-5 text-primary shrink-0" /> {wardenType} Hostel Applications
           </h2>
           <div className="mt-4 space-y-3">
             {apps.length > 0 ? (
               apps.map((a) => (
-                <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
-                  <div>
-                    <p className="text-sm font-bold">{a.studentName} ({a.regNo})</p>
-                    <p className="text-xs text-muted-foreground">
+                <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate">{a.studentName} ({a.regNo})</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       Block: {a.hostelName} · Room: {a.roomType} ({a.sharing} sharing)
                     </p>
-                    <p className="text-xs text-muted-foreground">Date: {a.appliedDate}</p>
+                    <p className="text-[11px] text-muted-foreground">Date: {a.appliedDate}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={a.status === "Approved" || a.status === "Room Allotted" ? "default" : a.status.includes("Rejected") ? "destructive" : "secondary"}>
+                  <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 shrink-0">
+                    <Badge variant={a.status === "Approved" || a.status === "Room Allotted" ? "default" : a.status.includes("Rejected") ? "destructive" : "secondary"} className="text-xs">
                       {a.status === "Approved by Warden" ? "Warden Approved" : a.status}
                     </Badge>
                     {(a.status === "Pending" || a.status === "Pending Warden Review") && (
                       <>
-                        <Button size="sm" variant="success" onClick={() => handleAppStatus(a.id, "Approved by Warden")}>
-                          Warden Approve
+                        <Button size="sm" variant="success" className="h-8 text-xs" onClick={() => handleAppStatus(a.id, "Approved by Warden")}>
+                          Approve
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleAppStatus(a.id, "Rejected by Warden")}>
+                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleAppStatus(a.id, "Rejected by Warden")}>
                           Reject
                         </Button>
                       </>
@@ -195,31 +195,31 @@ function WardenDashboard() {
         </section>
 
         {/* Room Change Approvals */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Building2 className="size-5 text-primary" /> {wardenType} Room Change Requests
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
+            <Building2 className="size-5 text-primary shrink-0" /> {wardenType} Room Change Requests
           </h2>
           <div className="mt-4 space-y-3">
             {roomChanges.length > 0 ? (
               roomChanges.map((r) => (
-                <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
-                  <div>
-                    <p className="text-sm font-bold">{r.studentName} ({r.regNo})</p>
-                    <p className="text-xs text-muted-foreground">
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate">{r.studentName} ({r.regNo})</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       Current: {r.currentHostel} #{r.currentRoom} ➔ Target: {r.targetHostel}
                     </p>
-                    <p className="text-xs text-muted-foreground">Reason: {r.reason}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">Reason: {r.reason}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={r.status === "Approved" || r.status === "Room Allotted" ? "default" : r.status.includes("Rejected") ? "destructive" : "secondary"}>
+                  <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 shrink-0">
+                    <Badge variant={r.status === "Approved" || r.status === "Room Allotted" ? "default" : r.status.includes("Rejected") ? "destructive" : "secondary"} className="text-xs">
                       {r.status === "Approved by Warden" ? "Warden Approved" : r.status}
                     </Badge>
                     {(r.status === "Pending" || r.status === "Pending Warden Review") && (
                       <>
-                        <Button size="sm" variant="success" onClick={() => handleRcStatus(r.id, "Approved by Warden")}>
-                          Warden Approve
+                        <Button size="sm" variant="success" className="h-8 text-xs" onClick={() => handleRcStatus(r.id, "Approved by Warden")}>
+                          Approve
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleRcStatus(r.id, "Rejected by Warden")}>
+                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleRcStatus(r.id, "Rejected by Warden")}>
                           Reject
                         </Button>
                       </>

@@ -133,22 +133,22 @@ function WardenProfile({ user: initialUser }) {
       title={`Warden Profile · ${wardenType} Hostel`}
       breadcrumb={["Profile"]}
       actions={
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {editingSection === "all" ? (
             <>
-              <Button variant="hero" onClick={() => handleSave(null)}>
-                <Save className="mr-2 size-4" /> Save All Changes
+              <Button variant="hero" onClick={() => handleSave(null)} className="flex-1 sm:flex-initial">
+                <Save className="mr-2 size-4" /> Save All
               </Button>
-              <Button variant="outline" onClick={() => setEditingSection(null)}>
+              <Button variant="outline" onClick={() => setEditingSection(null)} className="flex-1 sm:flex-initial">
                 <X className="mr-2 size-4" /> Cancel
               </Button>
             </>
           ) : (
-            <Button variant="hero" onClick={() => setEditingSection("all")}>
+            <Button variant="hero" onClick={() => setEditingSection("all")} className="flex-1 sm:flex-initial">
               <Pencil className="mr-2 size-4" /> Edit Profile Details
             </Button>
           )}
-          <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")}>
+          <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")} className="flex-1 sm:flex-initial">
             <Key className="mr-2 size-4" /> Change password
           </Button>
         </div>
@@ -157,7 +157,7 @@ function WardenProfile({ user: initialUser }) {
       <div className="grid gap-5 lg:grid-cols-[1fr_2fr]">
         {/* Left Column: Avatar & Contact */}
         <div className="space-y-5">
-          <section className="relative rounded-2xl border bg-card p-6 text-center shadow-soft">
+          <section className="relative rounded-2xl border bg-card p-4 sm:p-6 text-center shadow-soft">
             <div className="absolute right-4 top-4">
               <Button
                 variant="ghost"
@@ -539,22 +539,22 @@ function AdminProfile({ user: initialUser }) {
       title="System Administrator Profile"
       breadcrumb={["Profile"]}
       actions={
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {editingSection === "all" ? (
             <>
-              <Button variant="hero" onClick={() => handleSave(null)}>
-                <Save className="mr-2 size-4" /> Save All Changes
+              <Button variant="hero" onClick={() => handleSave(null)} className="flex-1 sm:flex-initial">
+                <Save className="mr-2 size-4" /> Save All
               </Button>
-              <Button variant="outline" onClick={() => setEditingSection(null)}>
+              <Button variant="outline" onClick={() => setEditingSection(null)} className="flex-1 sm:flex-initial">
                 <X className="mr-2 size-4" /> Cancel
               </Button>
             </>
           ) : (
-            <Button variant="hero" onClick={() => setEditingSection("all")}>
+            <Button variant="hero" onClick={() => setEditingSection("all")} className="flex-1 sm:flex-initial">
               <Pencil className="mr-2 size-4" /> Edit Profile Details
             </Button>
           )}
-          <Button variant="outline" onClick={() => toast.success("Password change link sent to admin email")}>
+          <Button variant="outline" onClick={() => toast.success("Password change link sent to admin email")} className="flex-1 sm:flex-initial">
             <Key className="mr-2 size-4" /> Change password
           </Button>
         </div>
@@ -562,7 +562,7 @@ function AdminProfile({ user: initialUser }) {
     >
       <div className="grid gap-5 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-5">
-          <section className="relative rounded-2xl border bg-card p-6 text-center shadow-soft">
+          <section className="relative rounded-2xl border bg-card p-4 sm:p-6 text-center shadow-soft">
             <div className="absolute right-4 top-4">
               <Button
                 variant="ghost"
@@ -928,22 +928,22 @@ function StudentProfile({ user: currentStudent }) {
       title="My Profile"
       breadcrumb={["Profile"]}
       actions={
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {editingSection === "all" ? (
             <>
-              <Button variant="hero" onClick={() => handleSave(null)} disabled={updateProfileMutation.isPending}>
-                <Save className="mr-2 size-4" /> {updateProfileMutation.isPending ? "Saving..." : "Save All Changes"}
+              <Button variant="hero" onClick={() => handleSave(null)} disabled={updateProfileMutation.isPending} className="flex-1 sm:flex-initial">
+                <Save className="mr-2 size-4" /> {updateProfileMutation.isPending ? "Saving..." : "Save All"}
               </Button>
-              <Button variant="outline" onClick={() => setEditingSection(null)}>
-                <X className="mr-2 size-4" /> Cancel Editing
+              <Button variant="outline" onClick={() => setEditingSection(null)} className="flex-1 sm:flex-initial">
+                <X className="mr-2 size-4" /> Cancel
               </Button>
             </>
           ) : (
-            <Button variant="hero" onClick={() => setEditingSection("all")}>
+            <Button variant="hero" onClick={() => setEditingSection("all")} className="flex-1 sm:flex-initial">
               <Pencil className="mr-2 size-4" /> Edit Profile Details
             </Button>
           )}
-          <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")}>
+          <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")} className="flex-1 sm:flex-initial">
             <Key className="mr-2 size-4" /> Change password
           </Button>
         </div>
@@ -952,7 +952,7 @@ function StudentProfile({ user: currentStudent }) {
       <div className="grid gap-5 lg:grid-cols-[1fr_2fr]">
         {/* Left Column: Avatar & Quick Summary */}
         <div className="space-y-5">
-          <section className="relative rounded-2xl border bg-card p-6 text-center shadow-soft">
+          <section className="relative rounded-2xl border bg-card p-4 sm:p-6 text-center shadow-soft">
             <div className="absolute right-4 top-4">
               <Button
                 variant="ghost"

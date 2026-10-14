@@ -122,7 +122,7 @@ function Dashboard() {
     >
       <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">
             <StatCard
               icon={Home}
               label="Hostel status"
@@ -150,14 +150,14 @@ function Dashboard() {
             />
           </div>
 
-          <div className="rounded-2xl border bg-card p-5 shadow-soft">
+          <div className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Application status trend</h2>
+              <h2 className="text-base sm:text-lg font-bold">Application status trend</h2>
               <Badge variant="secondary">2026 intake</Badge>
             </div>
-            <div className="mt-4 h-64">
+            <div className="mt-4 h-52 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={applicationTrend}>
+                <AreaChart data={applicationTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="apps" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.5} />
@@ -173,8 +173,8 @@ function Dashboard() {
                     stroke="var(--color-border)"
                     vertical={false}
                   />
-                  <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={12} />
-                  <YAxis stroke="var(--color-muted-foreground)" fontSize={12} />
+                  <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} />
+                  <YAxis stroke="var(--color-muted-foreground)" fontSize={11} />
                   <Tooltip
                     contentStyle={{
                       background: "var(--color-card)",
@@ -201,7 +201,7 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2.5 sm:gap-4 grid-cols-2 lg:grid-cols-3">
             {shortcuts.map((s, i) => (
               <motion.div
                 key={s.to}
@@ -211,12 +211,12 @@ function Dashboard() {
               >
                 <Link
                   to={s.to}
-                  className="group flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition-all hover:-translate-y-1 hover:shadow-elegant"
+                  className="group flex items-center gap-2.5 sm:gap-3 rounded-2xl border bg-card p-3 sm:p-4 shadow-soft transition-all hover:-translate-y-1 hover:shadow-elegant"
                 >
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                    <s.icon className="size-5" />
+                  <span className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground shrink-0">
+                    <s.icon className="size-4 sm:size-5" />
                   </span>
-                  <span className="text-sm font-semibold">{s.label}</span>
+                  <span className="text-xs sm:text-sm font-semibold truncate">{s.label}</span>
                 </Link>
               </motion.div>
             ))}

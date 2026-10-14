@@ -70,32 +70,32 @@ export function CompatibilityModal({ student, currentStudent, isOpen, onClose, o
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border bg-card p-6 shadow-2xl sm:p-8"
+          className="relative w-full max-w-2xl max-h-[92dvh] overflow-y-auto rounded-2xl sm:rounded-3xl border bg-card p-4 sm:p-8 shadow-2xl"
         >
           {/* Header */}
-          <div className="flex items-start justify-between border-b pb-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-start justify-between border-b pb-4 gap-3">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <img
                 src={student.avatar || "https://i.pravatar.cc/160"}
                 alt={student.name}
-                className="size-16 rounded-2xl object-cover ring-2 ring-primary/20"
+                className="size-13 sm:size-16 rounded-2xl object-cover ring-2 ring-primary/20 shrink-0"
               />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold font-display">{student.name}</h2>
-                  <Badge variant="hero" className="rounded-full text-xs">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-bold font-display truncate">{student.name}</h2>
+                  <Badge variant="hero" className="rounded-full text-xs shrink-0">
                     {student.compatibility || 85}% Match
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
                   {student.regNo} · {student.dept || student.department} (Year {student.year || 1})
                 </p>
-                <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="mt-1 flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <MapPin className="size-3 text-primary" /> {student.hometown || "Campus"}
                   </span>
@@ -107,21 +107,21 @@ export function CompatibilityModal({ student, currentStudent, isOpen, onClose, o
             </div>
             <button
               onClick={onClose}
-              className="rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors"
+              className="rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors shrink-0"
             >
               <X className="size-5" />
             </button>
           </div>
 
           {/* Banner */}
-          <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 p-4 border border-primary/20">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 p-3.5 sm:p-4 border border-primary/20">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-                <Sparkles className="size-5" />
+              <div className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
+                <Sparkles className="size-4 sm:size-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Lifestyle & Compatibility Breakdown</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs sm:text-sm font-semibold">Lifestyle & Compatibility Breakdown</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
                   Comparing {student.name.split(" ")[0]}'s preferences against your profile answers
                 </p>
               </div>
@@ -132,6 +132,7 @@ export function CompatibilityModal({ student, currentStudent, isOpen, onClose, o
                 size="sm"
                 disabled={isRequested}
                 onClick={() => onRequest(student)}
+                className="w-full sm:w-auto"
               >
                 <Heart className="mr-1.5 size-4" />
                 {isRequested ? "Request Sent" : "Select Roommate"}
@@ -144,7 +145,7 @@ export function CompatibilityModal({ student, currentStudent, isOpen, onClose, o
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Compatibility Questionnaire Responses
             </h3>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:gap-3 grid-cols-1 sm:grid-cols-2">
               {matches.map((m) => {
                 const Icon = m.icon;
                 return (

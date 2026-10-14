@@ -34,13 +34,13 @@ function HostelManagementPage() {
       title="Hostel Management"
       breadcrumb={["Admin", "Hostels"]}
       actions={
-        <Button variant="hero" onClick={() => toast.info("Add Block feature opening...")}>
+        <Button variant="hero" onClick={() => toast.info("Add Block feature opening...")} className="w-full sm:w-auto">
           <Plus className="mr-1.5 size-4" /> Add Hostel Block
         </Button>
       }
     >
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft">
-        <div className="relative min-w-56 flex-1">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border bg-card p-3.5 sm:p-4 shadow-soft">
+        <div className="relative w-full sm:w-auto sm:min-w-56 flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
@@ -49,12 +49,12 @@ function HostelManagementPage() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-1 rounded-xl bg-muted p-1">
+        <div className="flex gap-1 rounded-xl bg-muted p-1 w-full sm:w-auto justify-center">
           {["All", "Boys", "Girls"].map((t) => (
             <button
               key={t}
               onClick={() => setType(t)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors flex-1 sm:flex-initial text-center ${
                 type === t ? "bg-card text-primary shadow-soft" : "text-muted-foreground"
               }`}
             >

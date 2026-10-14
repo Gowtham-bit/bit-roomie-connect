@@ -129,8 +129,8 @@ function RoomAllocationPage() {
     <AppShell title="Manual Room Allocation & Approval Desk" breadcrumb={["Admin", "Allocation"]}>
       <div className="grid gap-6">
         {/* Hostel Applications Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <ClipboardList className="size-5 text-primary" /> New Student Hostel Applications
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -139,7 +139,7 @@ function RoomAllocationPage() {
           <div className="mt-4 space-y-3">
             {appsList.length > 0 ? (
               appsList.map((a) => (
-                <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+                <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
                   <div>
                     <p className="text-sm font-bold">{a.studentName} ({a.regNo})</p>
                     <p className="text-xs text-muted-foreground">
@@ -147,47 +147,50 @@ function RoomAllocationPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">Applied Date: {a.appliedDate}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0">
                     {a.status === "Room Allotted" || a.status === "Approved" ? (
-                      <Badge variant="default" className="px-3 py-1">
+                      <Badge variant="default" className="px-3 py-1 self-start sm:self-auto">
                         Room Allotted: Room {a.allottedRoom || "101"}
                       </Badge>
                     ) : (
                       <>
-                        <Badge variant={a.status.includes("Rejected") ? "destructive" : "secondary"}>
+                        <Badge variant={a.status.includes("Rejected") ? "destructive" : "secondary"} className="self-start sm:self-auto">
                           {a.status === "Approved by Warden" ? "Warden Approved" : a.status}
                         </Badge>
                         {(a.status === "Approved by Warden" || a.status === "Pending" || a.status === "Pending Warden Review") && (
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => setActivePicker({ type: "app", item: a })}
-                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10 w-full sm:w-auto justify-center"
                             >
                               <Layers className="size-3.5" /> View Floor Layout & Select Room
                             </Button>
-                            <Input
-                              placeholder="Room No (101)"
-                              value={manualAppRooms[a.id] || ""}
-                              onChange={(e) => setManualAppRooms({ ...manualAppRooms, [a.id]: e.target.value })}
-                              className="h-8 w-28 text-xs"
-                            />
-                            <Button
-                              size="sm"
-                              variant="hero"
-                              disabled={updateAppMutation.isPending}
-                              onClick={() => handleAdminApproveApp(a.id, a.hostelName, a.studentName)}
-                            >
-                              Allot Room
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAdminRejectApp(a.id)}
-                            >
-                              Reject
-                            </Button>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <Input
+                                placeholder="Room No"
+                                value={manualAppRooms[a.id] || ""}
+                                onChange={(e) => setManualAppRooms({ ...manualAppRooms, [a.id]: e.target.value })}
+                                className="h-8 w-20 sm:w-28 text-xs flex-1 sm:flex-initial"
+                              />
+                              <Button
+                                size="sm"
+                                variant="hero"
+                                disabled={updateAppMutation.isPending}
+                                onClick={() => handleAdminApproveApp(a.id, a.hostelName, a.studentName)}
+                                className="flex-1 sm:flex-initial"
+                              >
+                                Allot Room
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleAdminRejectApp(a.id)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </>
@@ -202,8 +205,8 @@ function RoomAllocationPage() {
         </section>
 
         {/* Room Change Desk */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <BedDouble className="size-5 text-primary" /> Room Change Requests Desk
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -212,7 +215,7 @@ function RoomAllocationPage() {
           <div className="mt-4 space-y-3">
             {roomChangesList.length > 0 ? (
               roomChangesList.map((r) => (
-                <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4">
                   <div>
                     <p className="text-sm font-bold">{r.studentName} ({r.regNo})</p>
                     <p className="text-xs text-muted-foreground">
@@ -220,47 +223,50 @@ function RoomAllocationPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">Reason: {r.reason}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0">
                     {r.status === "Room Allotted" || r.status === "Approved" ? (
-                      <Badge variant="default" className="px-3 py-1">
+                      <Badge variant="default" className="px-3 py-1 self-start sm:self-auto">
                         Room Allotted: Room {r.allottedRoom || "204"}
                       </Badge>
                     ) : (
                       <>
-                        <Badge variant={r.status.includes("Rejected") ? "destructive" : "secondary"}>
+                        <Badge variant={r.status.includes("Rejected") ? "destructive" : "secondary"} className="self-start sm:self-auto">
                           {r.status === "Approved by Warden" ? "Warden Approved" : r.status}
                         </Badge>
                         {(r.status === "Approved by Warden" || r.status === "Pending" || r.status === "Pending Warden Review") && (
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => setActivePicker({ type: "rc", item: r })}
-                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                              className="h-8 gap-1 text-xs border-primary/40 text-primary hover:bg-primary/10 w-full sm:w-auto justify-center"
                             >
                               <Layers className="size-3.5" /> View Floor Layout & Select Room
                             </Button>
-                            <Input
-                              placeholder="Room No (204)"
-                              value={manualRcRooms[r.id] || ""}
-                              onChange={(e) => setManualRcRooms({ ...manualRcRooms, [r.id]: e.target.value })}
-                              className="h-8 w-28 text-xs"
-                            />
-                            <Button
-                              size="sm"
-                              variant="hero"
-                              disabled={updateRcMutation.isPending}
-                              onClick={() => handleAdminAllotRoom(r.id, r.targetHostel, r.studentName)}
-                            >
-                              Allot Room
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAdminRejectRc(r.id)}
-                            >
-                              Reject
-                            </Button>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <Input
+                                placeholder="Room No"
+                                value={manualRcRooms[r.id] || ""}
+                                onChange={(e) => setManualRcRooms({ ...manualRcRooms, [r.id]: e.target.value })}
+                                className="h-8 w-20 sm:w-28 text-xs flex-1 sm:flex-initial"
+                              />
+                              <Button
+                                size="sm"
+                                variant="hero"
+                                disabled={updateRcMutation.isPending}
+                                onClick={() => handleAdminAllotRoom(r.id, r.targetHostel, r.studentName)}
+                                className="flex-1 sm:flex-initial"
+                              >
+                                Allot Room
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleAdminRejectRc(r.id)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </>

@@ -80,12 +80,12 @@ function Page() {
       <div className="grid gap-5 lg:grid-cols-[1fr_1.3fr]">
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl border bg-card p-6 shadow-soft"
+          className="space-y-4 rounded-2xl border bg-card p-4 sm:p-6 shadow-soft"
         >
-          <h2 className="text-lg font-bold">Raise a complaint</h2>
+          <h2 className="text-base sm:text-lg font-bold">Raise a complaint</h2>
           <div className="space-y-2">
             <Label>Category</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {["Electricity", "Water", "Internet", "Furniture", "Cleaning", "Others"].map((c) => (
                 <label
                   key={c}
@@ -144,13 +144,13 @@ function Page() {
           </Button>
         </form>
 
-        <section className="rounded-2xl border bg-card p-5 shadow-soft">
-          <h2 className="text-lg font-bold">My complaints</h2>
+        <section className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold">My complaints</h2>
           <ul className="mt-4 space-y-3">
             {mine.map((c) => (
-              <li key={c.id || c._id} className="rounded-xl border p-4 space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+              <li key={c.id || c._id} className="rounded-xl border p-3.5 sm:p-4 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <p className="text-sm font-semibold">{c.title}</p>
                     <Badge variant="outline">{c.category}</Badge>
                     <Badge variant={c.priority === "High" ? "destructive" : "secondary"}>

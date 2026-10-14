@@ -47,40 +47,40 @@ function Page() {
       }
     >
       <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <h2 className="text-lg font-bold">July 2026</h2>
-          <div className="mt-5 grid grid-cols-7 gap-2 text-center text-xs text-muted-foreground">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold">July 2026</h2>
+          <div className="mt-4 sm:mt-5 grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs text-muted-foreground font-semibold">
             {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
               <span key={i}>{d}</span>
             ))}
           </div>
-          <div className="mt-2 grid grid-cols-7 gap-2">
+          <div className="mt-2 grid grid-cols-7 gap-1 sm:gap-2">
             {days.map((d, i) => (
               <div
                 key={d.id}
-                className={`flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-semibold ${d.status === "Present" ? "bg-accent/15 text-accent" : d.status === "Absent" ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-warning"}`}
+                className={`flex aspect-square flex-col items-center justify-center rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all ${d.status === "Present" ? "bg-accent/15 text-accent" : d.status === "Absent" ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-warning"}`}
               >
                 {i + 1}
-                <span className="text-[9px] font-medium opacity-80">{d.status.slice(0, 3)}</span>
+                <span className="text-[8px] sm:text-[9px] font-medium opacity-80">{d.status.slice(0, 3)}</span>
               </div>
             ))}
           </div>
         </section>
         <section className="space-y-4">
-          <div className="rounded-2xl border bg-card p-6 text-center shadow-soft">
-            <p className="font-display text-5xl font-extrabold text-primary">{pct}%</p>
-            <p className="mt-1 text-sm text-muted-foreground">Monthly attendance</p>
+          <div className="rounded-2xl border bg-card p-4 sm:p-6 text-center shadow-soft">
+            <p className="font-display text-4xl sm:text-5xl font-extrabold text-primary">{pct}%</p>
+            <p className="mt-1 text-xs sm:text-sm text-muted-foreground">Monthly attendance</p>
             <Progress value={pct} className="mt-4" />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
               ["Present", count("Present")],
               ["Absent", count("Absent")],
               ["Leave", count("Leave")],
             ].map(([l, v]) => (
-              <div key={l} className="rounded-2xl border bg-card p-4 text-center shadow-soft">
-                <p className="font-display text-2xl font-bold">{v}</p>
-                <p className="text-xs text-muted-foreground">{l}</p>
+              <div key={l} className="rounded-xl sm:rounded-2xl border bg-card p-3 sm:p-4 text-center shadow-soft">
+                <p className="font-display text-xl sm:text-2xl font-bold">{v}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{l}</p>
               </div>
             ))}
           </div>

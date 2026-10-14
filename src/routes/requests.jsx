@@ -57,70 +57,74 @@ function Page() {
     <AppShell title="Roommate requests" breadcrumb={["Requests"]}>
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-2xl border bg-card p-5 shadow-soft">
-          <h2 className="text-lg font-bold">Incoming & Active Requests</h2>
+          <h2 className="text-base sm:text-lg font-bold">Incoming & Active Requests</h2>
           <ul className="mt-4 space-y-3">
             {(incoming.length > 0 ? incoming : suggested).map((m) => (
               <li
                 key={m.matchId || m.regNo}
-                className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3 sm:p-4"
               >
-                <img src={m.avatar || "https://i.pravatar.cc/160?img=1"} alt="" className="size-11 rounded-xl object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {m.dept || m.department} · Year {m.year}
-                  </p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <img src={m.avatar || "https://i.pravatar.cc/160?img=1"} alt="" className="size-10 sm:size-11 rounded-xl object-cover shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{m.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {m.dept || m.department} · Year {m.year}
+                    </p>
+                  </div>
                 </div>
-                <Badge variant="secondary">{m.compatibility || 85}%</Badge>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="success"
-                    disabled={sendMutation.isPending}
-                    onClick={() => handleAction(m.regNo, m.name, "Accepted")}
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={sendMutation.isPending}
-                    onClick={() => handleAction(m.regNo, m.name, "Rejected")}
-                  >
-                    Reject
-                  </Button>
+                <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0">
+                  <Badge variant="secondary" className="text-xs">{m.compatibility || 85}%</Badge>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="success"
+                      className="h-8 text-xs px-3"
+                      disabled={sendMutation.isPending}
+                      onClick={() => handleAction(m.regNo, m.name, "Accepted")}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs px-3"
+                      disabled={sendMutation.isPending}
+                      onClick={() => handleAction(m.regNo, m.name, "Rejected")}
+                    >
+                      Reject
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="rounded-2xl border bg-card p-5 shadow-soft">
-          <h2 className="text-lg font-bold">Accepted & Connected Matches</h2>
+        <section className="rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
+          <h2 className="text-base sm:text-lg font-bold">Accepted & Connected Matches</h2>
           <ul className="mt-4 space-y-3">
             {outgoing.length > 0 ? (
               outgoing.map((m) => (
                 <li
                   key={m.matchId || m.regNo}
-                  className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3 sm:p-4"
                 >
-                  <img src={m.avatar || "https://i.pravatar.cc/160?img=2"} alt="" className="size-11 rounded-xl object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{m.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.dept || m.department} · Year {m.year}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img src={m.avatar || "https://i.pravatar.cc/160?img=2"} alt="" className="size-10 sm:size-11 rounded-xl object-cover shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{m.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {m.dept || m.department} · Year {m.year}
+                      </p>
+                    </div>
                   </div>
-                  <Badge variant="default">Accepted</Badge>
-                  <Button
-                    size="sm"
-                    variant="soft"
-                    asChild
-                  >
-                    <Link to="/chat" search={{ target: m.id || m.regNo }}>
-                      Chat
-                    </Link>
-                  </Button>
+                  <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0">
+                    <Badge variant="default">Accepted</Badge>
+                    <Badge variant="outline" className="border-primary/40 text-primary text-xs">
+                      Matched Roommate
+                    </Badge>
+                  </div>
                 </li>
               ))
             ) : (

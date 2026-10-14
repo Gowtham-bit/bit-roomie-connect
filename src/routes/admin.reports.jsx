@@ -50,15 +50,15 @@ function ReportsPage() {
       title="System Reports & Export Analytics"
       breadcrumb={["Admin", "Reports"]}
       actions={
-        <Button variant="hero" onClick={() => handleExport("Full System Comprehensive Report")}>
+        <Button variant="hero" onClick={() => handleExport("Full System Comprehensive Report")} className="w-full sm:w-auto">
           <Download className="mr-1.5 size-4" /> Download Complete Report
         </Button>
       }
     >
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Occupancy Analytics Report */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft">
-          <div className="flex items-center justify-between border-b pb-4">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4">
             <h2 className="text-base font-bold flex items-center gap-2">
               <Building2 className="size-5 text-primary" /> Block Occupancy & Capacity Report
             </h2>
@@ -66,6 +66,7 @@ function ReportsPage() {
               size="sm"
               variant="outline"
               onClick={() => handleExport("Occupancy & Capacity PDF")}
+              className="w-full sm:w-auto"
             >
               <Download className="mr-1 size-3.5" /> PDF
             </Button>
@@ -75,7 +76,7 @@ function ReportsPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={occupancyChart}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" stroke="#888888" fontSize={11} />
+                <XAxis dataKey="name" stroke="#888888" fontSize={11} interval={0} />
                 <YAxis stroke="#888888" fontSize={11} />
                 <Tooltip />
                 <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Occupied" />
@@ -86,7 +87,7 @@ function ReportsPage() {
 
         {/* Available Export Templates */}
         <section className="space-y-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <FileBarChart className="size-5 text-primary" /> Quick Export Reports
           </h2>
           <div className="space-y-3">
@@ -98,16 +99,16 @@ function ReportsPage() {
             ].map(([title, desc, badge]) => (
               <div
                 key={title}
-                className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-soft transition-all hover:shadow-elegant"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border bg-card p-3.5 sm:p-4 shadow-soft transition-all hover:shadow-elegant"
               >
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="font-bold text-sm">{title}</p>
                     <Badge variant="secondary">{badge}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
                 </div>
-                <Button size="sm" variant="soft" onClick={() => handleExport(title)}>
+                <Button size="sm" variant="soft" onClick={() => handleExport(title)} className="w-full sm:w-auto">
                   <Download className="mr-1.5 size-3.5" /> Export
                 </Button>
               </div>

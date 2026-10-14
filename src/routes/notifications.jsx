@@ -45,26 +45,30 @@ function Page() {
         {list.map((n) => (
           <article
             key={n.id}
-            className={`flex gap-4 rounded-2xl border bg-card p-5 shadow-soft ${!n.read ? "border-primary/40" : ""}`}
+            className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-2xl border bg-card p-4 sm:p-5 shadow-soft ${!n.read ? "border-primary/40" : ""}`}
           >
-            <span
-              className="mt-1 size-2.5 shrink-0 rounded-full"
-              style={{
-                background: n.read ? "var(--color-muted-foreground)" : "var(--color-primary)",
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-semibold">{n.title}</p>
-                <Badge variant="outline">{n.category}</Badge>
-                {!n.read && <Badge variant="secondary">Unread</Badge>}
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <span
+                className="mt-1.5 size-2.5 shrink-0 rounded-full"
+                style={{
+                  background: n.read ? "var(--color-muted-foreground)" : "var(--color-primary)",
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <p className="text-sm font-semibold">{n.title}</p>
+                  <Badge variant="outline" className="text-[10px] sm:text-xs">{n.category}</Badge>
+                  {!n.read && <Badge variant="secondary" className="text-[10px] sm:text-xs">Unread</Badge>}
+                </div>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{n.body}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">{n.date}</p>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{n.date}</p>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => toast("Marked as read")}>
-              Mark read
-            </Button>
+            <div className="flex justify-end pt-2 sm:pt-0 border-t sm:border-t-0">
+              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => toast("Marked as read")}>
+                Mark read
+              </Button>
+            </div>
           </article>
         ))}
       </div>

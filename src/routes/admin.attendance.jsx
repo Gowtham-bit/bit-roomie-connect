@@ -64,8 +64,8 @@ function AdminAttendancePage() {
     <AppShell title="Hostel Attendance Monitoring" breadcrumb={["Admin", "Attendance"]}>
       <div className="grid gap-6 lg:grid-cols-[1fr_1.8fr]">
         {/* Left: Log Attendance Form */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft h-fit">
-          <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft h-fit">
+          <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <UserCheck className="size-5 text-primary" /> Mark Daily Attendance
           </h2>
           <form onSubmit={handleMarkAttendance} className="mt-4 space-y-4">
@@ -105,12 +105,12 @@ function AdminAttendancePage() {
         </section>
 
         {/* Right: Recent Logs List */}
-        <section className="rounded-2xl border bg-card p-6 shadow-soft space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="rounded-2xl border bg-card p-4 sm:p-6 shadow-soft space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+            <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
               <CalendarCheck className="size-5 text-primary" /> Attendance Logs Directory
             </h2>
-            <div className="relative min-w-48">
+            <div className="relative w-full sm:w-auto sm:min-w-48">
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={q}
