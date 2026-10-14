@@ -12,7 +12,15 @@ import {
   occupancyByHostel as mockOccupancy,
 } from "./mock-data";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+export function getApiBaseUrl() {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== "undefined" && window.location?.hostname) {
+    return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+  }
+  return "http://localhost:5000/api";
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 function getToken() {
   if (typeof window !== "undefined") {

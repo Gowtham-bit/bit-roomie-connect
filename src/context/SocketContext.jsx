@@ -33,7 +33,9 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+    const host = typeof window !== "undefined" && window.location?.hostname ? window.location.hostname : "localhost";
+    const protocol = typeof window !== "undefined" && window.location?.protocol === "https:" ? "https:" : "http:";
+    const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_URL || `${protocol}//${host}:5000`;
 
     const newSocket = io(SOCKET_SERVER_URL, {
       auth: { token },

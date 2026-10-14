@@ -42,6 +42,40 @@ export const Route = createFileRoute("/chat")({
   component: ChatPage,
 });
 
+// Web Audio API notification chime (lightweight WhatsApp-style soft pop/chime)
+function playNotificationSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    gain1.gain.setValueAtTime(0.08, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880, now + 0.08); // A5
+    gain2.gain.setValueAtTime(0.1, now + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.08);
+    osc2.stop(now + 0.3);
+  } catch (e) {
+    // Autoplay restrictions before user interaction
+  }
+}
+
 function ChatPage() {
   const currentUser = getCurrentUser() || {};
   const currentUserId = currentUser.id || currentUser.regNo;
@@ -65,6 +99,7 @@ function ChatPage() {
   const typingTimeoutRef = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
   const activeConversationRef = useRef(activeConversation);
 
   // Keep activeConversationRef in sync with current state
@@ -167,15 +202,33 @@ function ChatPage() {
 
     const handleReceiveMessage = (incomingMsg) => {
       const incomingConvId = String(incomingMsg.conversationId);
-      const activeConvId = activeConversationRef.current?._id
-        ? String(activeConversationRef.current._id)
+      const currentActiveConv = activeConversationRef.current;
+      const activeConvId = currentActiveConv?._id
+        ? String(currentActiveConv._id)
         : null;
+      const currentRecipient = currentActiveConv?.recipient || {};
+      const currentRecipientId = currentRecipient.id || currentRecipient.regNo;
 
-      // A. If message belongs to current active conversation, update messages array
-      if (activeConvId && incomingConvId === activeConvId) {
+      // Robust WhatsApp-style matching:
+      // Matches if conversationId matches OR if the message is between you and the current partner!
+      const isCurrentChat =
+        Boolean(activeConvId && incomingConvId === activeConvId) ||
+        Boolean(
+          currentRecipientId &&
+          ((incomingMsg.senderId === currentRecipientId && incomingMsg.receiverId === currentUserId) ||
+           (incomingMsg.receiverId === currentRecipientId && incomingMsg.senderId === currentUserId))
+        );
+
+      // A. If message belongs to current active conversation, update messages array immediately
+      if (isCurrentChat) {
+        // Sync conversationId if needed
+        if (currentActiveConv && activeConvId !== incomingConvId) {
+          setActiveConversation((prev) => (prev ? { ...prev, _id: incomingConvId } : prev));
+        }
+
         setMessages((prev) => {
           // Prevent duplicates if already exists by MongoDB _id
-          if (incomingMsg._id && prev.some((m) => m._id === incomingMsg._id)) {
+          if (incomingMsg._id && prev.some((m) => String(m._id) === String(incomingMsg._id))) {
             return prev;
           }
 
@@ -207,13 +260,24 @@ function ChatPage() {
             }
           }
 
-          // Append new message
+          // Append new message immediately
           return [...prev, incomingMsg];
         });
 
-        // Mark as read if from other user
+        // Smooth scroll to latest message
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 30);
+
+        // Mark as read if from other user and play chime
         if (incomingMsg.senderId !== currentUserId) {
-          socket.emit("mark_as_read", { conversationId: activeConvId });
+          socket.emit("mark_as_read", { conversationId: incomingConvId });
+          playNotificationSound();
+        }
+      } else {
+        // Incoming message from another conversation
+        if (incomingMsg.senderId !== currentUserId) {
+          playNotificationSound();
         }
       }
 
@@ -223,7 +287,14 @@ function ChatPage() {
         if (!exists) {
           // New contact/conversation: re-fetch conversation list to display it
           apiGetConversations().then((data) => {
-            if (data) setConversations(data);
+            if (data && data.length > 0) {
+              setConversations(data);
+              // Auto-open if user currently had no conversation selected
+              if (!activeConversationRef.current) {
+                const targetConv = data.find((c) => String(c._id) === incomingConvId) || data[0];
+                setActiveConversation(targetConv);
+              }
+            }
           });
           return prev;
         }
@@ -231,7 +302,7 @@ function ChatPage() {
         return prev
           .map((c) => {
             if (String(c._id) === incomingConvId) {
-              const isActive = activeConvId === incomingConvId;
+              const isActive = isCurrentChat;
               const newUnread = isActive
                 ? 0
                 : (c.unreadCount || 0) + (incomingMsg.senderId !== currentUserId ? 1 : 0);
@@ -360,6 +431,12 @@ function ChatPage() {
 
     setMessages((prev) => [...prev, tempMsg]);
     setNewMessageText("");
+
+    // Auto-scroll instantly on send
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      inputRef.current?.focus();
+    }, 20);
 
     // Emit stop typing
     if (socket) {
@@ -702,10 +779,12 @@ function ChatPage() {
               {/* Chat Input Form */}
               <form onSubmit={handleSendMessage} className="p-3 border-t bg-card flex items-center gap-2">
                 <Input
+                  ref={inputRef}
                   placeholder={`Message ${recipient.name || "user"}...`}
                   value={newMessageText}
                   onChange={handleInputChange}
                   className="flex-1 rounded-xl text-sm"
+                  autoFocus
                 />
                 <Button
                   type="submit"
