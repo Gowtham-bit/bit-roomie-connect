@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { setToken } from "@/lib/api";
+import { DEPARTMENTS } from "@/lib/mock-data";
 import {
   useCurrentUser,
   useUpdateProfile,
@@ -29,9 +31,122 @@ import {
   HeartHandshake,
   Sparkles,
   User,
+  Camera,
+  Upload,
+  Trash2,
 } from "lucide-react";
 
+const DEFAULT_AVATAR = "/default-avatar.svg";
+
+function ProfileAvatarUploader({
+  avatar,
+  name,
+  onAvatarChange,
+  disabled = false,
+  className = "",
+}) {
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (PNG, JPG, JPEG, WEBP).");
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image file size should be less than 3 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result;
+      if (base64) {
+        onAvatarChange(base64);
+        toast.success("Profile picture updated from device!");
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleRemove = () => {
+    onAvatarChange("");
+    toast.success("Profile picture reset to default.");
+  };
+
+  const avatarSrc = avatar && typeof avatar === "string" && avatar.trim() !== "" ? avatar : DEFAULT_AVATAR;
+
+  return (
+    <div className={`flex flex-col items-center ${className}`}>
+      <div className="relative mx-auto size-28 sm:size-32 group">
+        <img
+          src={avatarSrc}
+          onError={(e) => {
+            e.currentTarget.src = DEFAULT_AVATAR;
+          }}
+          alt={name || "Profile picture"}
+          className="size-28 sm:size-32 rounded-3xl object-cover ring-4 ring-primary/20 bg-muted shadow-md transition-all group-hover:ring-primary/40"
+        />
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          className="hidden"
+          disabled={disabled}
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => fileInputRef.current?.click()}
+          className="absolute -bottom-2 -right-2 flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
+          title="Upload profile picture from device"
+          aria-label="Upload photo"
+        >
+          <Camera className="size-4" />
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+          onClick={() => fileInputRef.current?.click()}
+          className="h-7 text-xs px-2.5 rounded-lg border-primary/30 text-primary hover:bg-primary/10"
+        >
+          <Upload className="mr-1.5 size-3" /> Choose from device
+        </Button>
+        {avatar && typeof avatar === "string" && avatar.trim() !== "" && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            onClick={handleRemove}
+            className="h-7 text-xs px-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
+            title="Reset to default image"
+          >
+            <Trash2 className="size-3 mr-1" /> Remove
+          </Button>
+        )}
+      </div>
+      <p className="mt-1 text-[11px] text-muted-foreground">
+        PNG, JPG, WEBP up to 3MB
+      </p>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/profile")({
+  validateSearch: (search) => ({
+    setup: search?.setup === "true" || search?.setup === true ? "true" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "User Profile · BIT Hostel Portal" },
@@ -48,6 +163,8 @@ export const Route = createFileRoute("/profile")({
 function Page() {
   const { data: user } = useCurrentUser();
   const currentStudent = user || {};
+  const search = Route.useSearch();
+  const isSetup = search?.setup === "true" || currentStudent.isProfileComplete === false;
 
   const isAdmin = currentStudent.role === "admin" || currentStudent.regNo === "admin123";
   const isWarden =
@@ -62,7 +179,7 @@ function Page() {
     return <WardenProfile user={currentStudent} />;
   }
 
-  return <StudentProfile user={currentStudent} />;
+  return <StudentProfile user={currentStudent} isSetup={isSetup} />;
 }
 
 // ==========================================
@@ -87,7 +204,7 @@ function WardenProfile({ user: initialUser }) {
     department: initialUser.department || "Hostel Administration",
     designation: initialUser.designation || "Hostel Warden",
     dateOfJoining: initialUser.dateOfJoining || "15 August 2021",
-    avatar: initialUser.avatar || (isGirlsWarden ? "https://i.pravatar.cc/160?img=47" : "https://i.pravatar.cc/160?img=68"),
+    avatar: initialUser.avatar || "",
     assignedBlocks: initialUser.assignedBlocks || (isGirlsWarden ? "Ganga, Yamuna, Narmadha, Cauvery" : "Sapphire, Emerald, Ruby, Diamond"),
     responsibilities: initialUser.responsibilities || [
       "Student Management",
@@ -172,10 +289,15 @@ function WardenProfile({ user: initialUser }) {
 
             {isEditing("basic") ? (
               <div className="space-y-3 text-left pt-2">
-                <div>
-                  <Label className="text-xs">Avatar URL</Label>
-                  <Input value={formData.avatar} onChange={(e) => handleChange("avatar", e.target.value)} className="mt-1" />
-                </div>
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
+                  className="mb-2"
+                />
                 <div>
                   <Label className="text-xs">Full Name</Label>
                   <Input value={formData.name} onChange={(e) => handleChange("name", e.target.value)} className="mt-1" />
@@ -196,10 +318,13 @@ function WardenProfile({ user: initialUser }) {
               </div>
             ) : (
               <>
-                <img
-                  src={formData.avatar}
-                  alt={formData.name}
-                  className="mx-auto size-28 rounded-3xl object-cover ring-4 ring-primary/20"
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
                 />
                 <h2 className="font-display mt-4 text-xl font-bold">{formData.name}</h2>
                 <p className="text-sm font-semibold text-primary">{formData.empId}</p>
@@ -493,7 +618,7 @@ function AdminProfile({ user: initialUser }) {
     phone: initialUser.phone || "+91 98765 43210",
     designation: initialUser.designation || "Hostel Administrator",
     department: initialUser.department || "IT & Operations",
-    avatar: initialUser.avatar || "https://i.pravatar.cc/160?img=60",
+    avatar: initialUser.avatar || "",
     responsibilities: initialUser.responsibilities || [
       "Student Management",
       "Warden Management",
@@ -576,10 +701,15 @@ function AdminProfile({ user: initialUser }) {
 
             {isEditing("basic") ? (
               <div className="space-y-3 text-left pt-2">
-                <div>
-                  <Label className="text-xs">Avatar URL</Label>
-                  <Input value={formData.avatar} onChange={(e) => handleChange("avatar", e.target.value)} className="mt-1" />
-                </div>
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
+                  className="mb-2"
+                />
                 <div>
                   <Label className="text-xs">Full Name</Label>
                   <Input value={formData.name} onChange={(e) => handleChange("name", e.target.value)} className="mt-1" />
@@ -600,10 +730,13 @@ function AdminProfile({ user: initialUser }) {
               </div>
             ) : (
               <>
-                <img
-                  src={formData.avatar}
-                  alt={formData.name}
-                  className="mx-auto size-28 rounded-3xl object-cover ring-4 ring-primary/20"
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
                 />
                 <h2 className="font-display mt-4 text-xl font-bold">{formData.name}</h2>
                 <p className="text-sm font-semibold text-primary">{formData.adminId}</p>
@@ -784,9 +917,10 @@ function AdminProfile({ user: initialUser }) {
 // ==========================================
 // 🎓 STUDENT PROFILE COMPONENT (Fully Editable)
 // ==========================================
-function StudentProfile({ user: currentStudent }) {
+function StudentProfile({ user: currentStudent, isSetup = false }) {
+  const navigate = useNavigate();
   const updateProfileMutation = useUpdateProfile();
-  const [editingSection, setEditingSection] = useState(null); // null, 'all', 'basic', 'personal', 'traits', 'academic', 'hostel', 'guardian'
+  const [editingSection, setEditingSection] = useState(isSetup ? "all" : null); // null, 'all', 'basic', 'personal', 'traits', 'academic', 'hostel', 'guardian'
 
   const [formData, setFormData] = useState({
     name: "",
@@ -824,43 +958,50 @@ function StudentProfile({ user: currentStudent }) {
   });
 
   useEffect(() => {
-    if (currentStudent) {
-      setFormData({
-        name: currentStudent.name || "Student",
-        regNo: currentStudent.regNo || "7376242AD142",
-        avatar: currentStudent.avatar || "https://i.pravatar.cc/160?img=12",
-        email: currentStudent.email || "student@bitsathy.ac.in",
-        mobile: currentStudent.mobile || "9876543210",
-        gender: currentStudent.gender || "Male",
-        hometown: currentStudent.hometown || "Coimbatore",
+    if (isSetup) {
+      setEditingSection("all");
+    }
+  }, [isSetup]);
 
-        sleep: currentStudent.traits?.sleep || "10 PM – 12 AM",
-        cleanliness: String(currentStudent.traits?.cleanliness || "Very Clean"),
-        food: currentStudent.traits?.food || "Non-Veg",
-        personality: currentStudent.traits?.personality || "Ambivert",
-        noise: currentStudent.traits?.noise || "Moderate",
-        study: currentStudent.traits?.study || "Night",
-        visitors: currentStudent.traits?.visitors || "Occasionally",
-        language: currentStudent.language || "Tamil",
+  useEffect(() => {
+    if (currentStudent) {
+      setFormData((prev) => ({
+        ...prev,
+        name: currentStudent.name || prev.name || "Student",
+        regNo: currentStudent.regNo || prev.regNo || "",
+        avatar: currentStudent.avatar || prev.avatar || "",
+        email: currentStudent.email || prev.email || "",
+        mobile: currentStudent.mobile || prev.mobile || "",
+        gender: currentStudent.gender || prev.gender || "Male",
+        hometown: currentStudent.hometown || prev.hometown || "",
+
+        sleep: currentStudent.traits?.sleep || prev.sleep || "10 PM – 12 AM",
+        cleanliness: String(currentStudent.traits?.cleanliness || prev.cleanliness || "Very Clean"),
+        food: currentStudent.traits?.food || prev.food || "Non-Veg",
+        personality: currentStudent.traits?.personality || prev.personality || "Ambivert",
+        noise: currentStudent.traits?.noise || prev.noise || "Moderate",
+        study: currentStudent.traits?.study || prev.study || "Night",
+        visitors: currentStudent.traits?.visitors || prev.visitors || "Occasionally",
+        language: currentStudent.language || prev.language || "Tamil",
         interests: Array.isArray(currentStudent.interests)
           ? currentStudent.interests.join(", ")
-          : currentStudent.interests || "Coding, Cricket, Gaming",
+          : currentStudent.interests || prev.interests || "Coding, Cricket, Gaming",
 
-        department: currentStudent.department || "Computer Science and Engineering",
-        dept: (currentStudent.dept || currentStudent.department || "CSE").replace(/CSa?E/gi, "CSE"),
-        year: currentStudent.year || 1,
-        cgpa: currentStudent.cgpa || "8.50",
+        department: currentStudent.department || prev.department || "Computer Science and Engineering",
+        dept: (currentStudent.dept || currentStudent.department || prev.dept || "CSE").replace(/CSa?E/gi, "CSE"),
+        year: currentStudent.year || prev.year || 1,
+        cgpa: currentStudent.cgpa || prev.cgpa || "8.50",
 
-        hostel: currentStudent.hostel || "Sapphire Block",
-        room: currentStudent.room || "312",
-        messPlan: currentStudent.messPlan || "Vegetarian",
-        feeStatus: currentStudent.feeStatus || "Term I Paid",
+        hostel: currentStudent.hostel || prev.hostel || "Sapphire Block",
+        room: currentStudent.room || prev.room || "312",
+        messPlan: currentStudent.messPlan || prev.messPlan || "Vegetarian",
+        feeStatus: currentStudent.feeStatus || prev.feeStatus || "Term I Paid",
 
-        guardianName: currentStudent.guardian?.name || currentStudent.guardianName || "Subramanian R",
-        guardianRelation: currentStudent.guardian?.relation || currentStudent.guardianRelation || "Father",
-        guardianMobile: currentStudent.guardian?.mobile || currentStudent.guardianMobile || "9843112233",
-        guardianOccupation: currentStudent.guardian?.occupation || currentStudent.guardianOccupation || "Agriculturist",
-      });
+        guardianName: currentStudent.guardian?.name || currentStudent.guardianName || prev.guardianName || "",
+        guardianRelation: currentStudent.guardian?.relation || currentStudent.guardianRelation || prev.guardianRelation || "Father",
+        guardianMobile: currentStudent.guardian?.mobile || currentStudent.guardianMobile || prev.guardianMobile || "",
+        guardianOccupation: currentStudent.guardian?.occupation || currentStudent.guardianOccupation || prev.guardianOccupation || "",
+      }));
     }
   }, [currentStudent]);
 
@@ -868,10 +1009,19 @@ function StudentProfile({ user: currentStudent }) {
     setFormData((prev) => ({ ...prev, [field]: val }));
   };
 
-  const handleSave = (sectionToClose = null) => {
+  const handleSave = (sectionToClose = null, proceedToDashboard = false) => {
+    if (!formData.name?.trim()) {
+      toast.error("Please enter your Full Name.");
+      return;
+    }
+    if (!formData.regNo?.trim()) {
+      toast.error("Please enter your Register Number.");
+      return;
+    }
+
     const payload = {
-      name: formData.name,
-      regNo: formData.regNo,
+      name: formData.name.trim(),
+      regNo: formData.regNo.trim(),
       avatar: formData.avatar,
       email: formData.email,
       mobile: formData.mobile,
@@ -887,6 +1037,7 @@ function StudentProfile({ user: currentStudent }) {
       room: formData.room,
       messPlan: formData.messPlan,
       feeStatus: formData.feeStatus,
+      isProfileComplete: true,
       guardian: {
         name: formData.guardianName,
         relation: formData.guardianRelation,
@@ -909,10 +1060,21 @@ function StudentProfile({ user: currentStudent }) {
         if (res && res.error) {
           toast.error("Update Failed", { description: res.error });
         } else {
-          toast.success("Profile Updated Successfully", {
-            description: "All section changes have been saved.",
+          if (res?.token) {
+            setToken(res.token);
+          }
+          toast.success("Profile Details Saved Successfully!", {
+            description: (isSetup || proceedToDashboard)
+              ? "Your profile setup is complete! Redirecting to Dashboard..."
+              : "All section changes have been saved.",
           });
           setEditingSection(sectionToClose);
+
+          if (isSetup || proceedToDashboard) {
+            setTimeout(() => {
+              navigate({ to: "/dashboard" });
+            }, 700);
+          }
         }
       },
       onError: (err) => {
@@ -925,11 +1087,20 @@ function StudentProfile({ user: currentStudent }) {
 
   return (
     <AppShell
-      title="My Profile"
-      breadcrumb={["Profile"]}
+      title={isSetup ? "Complete Your Profile Details" : "My Profile"}
+      breadcrumb={isSetup ? ["Onboarding", "Profile Setup"] : ["Profile"]}
       actions={
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {editingSection === "all" ? (
+          {isSetup ? (
+            <Button
+              variant="hero"
+              onClick={() => handleSave(null, true)}
+              disabled={updateProfileMutation.isPending}
+              className="flex-1 sm:flex-initial shadow-md"
+            >
+              <Save className="mr-2 size-4" /> {updateProfileMutation.isPending ? "Saving..." : "Save & Continue to Dashboard"}
+            </Button>
+          ) : editingSection === "all" ? (
             <>
               <Button variant="hero" onClick={() => handleSave(null)} disabled={updateProfileMutation.isPending} className="flex-1 sm:flex-initial">
                 <Save className="mr-2 size-4" /> {updateProfileMutation.isPending ? "Saving..." : "Save All"}
@@ -943,50 +1114,115 @@ function StudentProfile({ user: currentStudent }) {
               <Pencil className="mr-2 size-4" /> Edit Profile Details
             </Button>
           )}
-          <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")} className="flex-1 sm:flex-initial">
-            <Key className="mr-2 size-4" /> Change password
-          </Button>
+          {!isSetup && (
+            <Button variant="outline" onClick={() => toast.success("Password reset link sent to registered email")} className="flex-1 sm:flex-initial">
+              <Key className="mr-2 size-4" /> Change password
+            </Button>
+          )}
         </div>
       }
     >
+      {isSetup && (
+        <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/10 p-5 shadow-soft">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md shrink-0">
+              <Sparkles className="size-6" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="hero" className="text-xs px-2 py-0.5">First-Time Setup</Badge>
+                <span className="text-xs font-semibold text-primary">Required Action</span>
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground mt-1">
+                Welcome to BIT Hostel Portal! Complete Your Profile Details
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Please enter or review your profile details below (Name, Register Number, Department, Local Profile Photo, Guardian Information, and Roommate Lifestyle Preferences). Once saved, your account will be activated for hostel room allocations and services.
+              </p>
+            </div>
+            <Button
+              variant="hero"
+              size="lg"
+              disabled={updateProfileMutation.isPending}
+              onClick={() => handleSave(null, true)}
+              className="w-full sm:w-auto shadow-md shrink-0"
+            >
+              <Save className="mr-2 size-4" />
+              {updateProfileMutation.isPending ? "Saving..." : "Save & Continue to Dashboard"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-[1fr_2fr]">
         {/* Left Column: Avatar & Quick Summary */}
         <div className="space-y-5">
           <section className="relative rounded-2xl border bg-card p-4 sm:p-6 text-center shadow-soft">
-            <div className="absolute right-4 top-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditingSection(isEditing("basic") ? null : "basic")}
-                className="size-8 p-0"
-                title="Edit core details"
-              >
-                <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
-              </Button>
-            </div>
+            {!isSetup && (
+              <div className="absolute right-4 top-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingSection(isEditing("basic") ? null : "basic")}
+                  className="size-8 p-0"
+                  title="Edit core details"
+                >
+                  <Pencil className="size-4 text-muted-foreground hover:text-foreground" />
+                </Button>
+              </div>
+            )}
 
             {isEditing("basic") ? (
               <div className="space-y-3 text-left pt-2">
-                <div>
-                  <Label className="text-xs">Avatar Image URL</Label>
-                  <Input
-                    value={formData.avatar}
-                    onChange={(e) => handleChange("avatar", e.target.value)}
-                    placeholder="https://i.pravatar.cc/160?img=12"
-                    className="mt-1"
-                  />
-                </div>
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
+                  className="mb-2"
+                />
                 <div>
                   <Label className="text-xs">Full Name</Label>
-                  <Input value={formData.name} onChange={(e) => handleChange("name", e.target.value)} className="mt-1" />
+                  <Input value={formData.name} onChange={(e) => handleChange("name", e.target.value)} className="mt-1" placeholder="e.g. Gowtham" />
                 </div>
                 <div>
                   <Label className="text-xs">Register Number</Label>
-                  <Input value={formData.regNo} onChange={(e) => handleChange("regNo", e.target.value)} className="mt-1" />
+                  <Input value={formData.regNo} onChange={(e) => handleChange("regNo", e.target.value)} className="mt-1" placeholder="e.g. 7376242AD142" />
                 </div>
                 <div>
-                  <Label className="text-xs">Department Code</Label>
-                  <Input value={formData.dept} onChange={(e) => handleChange("dept", e.target.value)} className="mt-1" />
+                  <Label className="text-xs">Department</Label>
+                  <select
+                    value={formData.department}
+                    onChange={(e) => {
+                      const deptName = e.target.value;
+                      handleChange("department", deptName);
+                      const map = {
+                        "Computer Science and Engineering": "CSE",
+                        "Information Technology": "IT",
+                        "Artificial Intelligence and Data Science": "AI&DS",
+                        "Artificial Intelligence and Machine Learning": "AI&ML",
+                        "Electronics and Communication Engineering": "ECE",
+                        "Electrical and Electronics Engineering": "EEE",
+                        "Mechanical Engineering": "MECH",
+                        "Civil Engineering": "CIVIL",
+                        "Biotechnology": "BT",
+                        "Biomedical Engineering": "BME",
+                        "Fashion Technology": "FT",
+                        "Food Technology": "FD",
+                        "Agricultural Engineering": "AGRI",
+                      };
+                      if (map[deptName]) {
+                        handleChange("dept", map[deptName]);
+                      }
+                    }}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {DEPARTMENTS.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <Label className="text-xs">Year of Study</Label>
@@ -1009,12 +1245,15 @@ function StudentProfile({ user: currentStudent }) {
               </div>
             ) : (
               <>
-                <img
-                  src={formData.avatar}
-                  alt={formData.name}
-                  className="mx-auto size-28 rounded-3xl object-cover ring-4 ring-primary/20"
+                <ProfileAvatarUploader
+                  avatar={formData.avatar}
+                  name={formData.name}
+                  onAvatarChange={(newAvatar) => {
+                    handleChange("avatar", newAvatar);
+                    updateProfileMutation.mutate({ avatar: newAvatar });
+                  }}
                 />
-                <h2 className="font-display mt-4 text-xl font-bold">{formData.name}</h2>
+                <h2 className="font-display mt-3 text-xl font-bold">{formData.name}</h2>
                 <p className="text-sm font-semibold text-primary">{formData.regNo}</p>
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <Badge variant="hero">{formData.dept}</Badge>
@@ -1507,6 +1746,27 @@ function StudentProfile({ user: currentStudent }) {
               </dl>
             )}
           </section>
+
+          {isSetup && (
+            <div className="rounded-2xl border border-primary/30 bg-card p-6 shadow-soft flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 className="font-bold text-sm">All set with your profile details?</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Confirm all required information above and click below to complete setup and proceed to your dashboard.
+                </p>
+              </div>
+              <Button
+                variant="hero"
+                size="lg"
+                disabled={updateProfileMutation.isPending}
+                onClick={() => handleSave(null, true)}
+                className="w-full sm:w-auto shadow-md"
+              >
+                <Save className="mr-2 size-4" />
+                {updateProfileMutation.isPending ? "Saving Details..." : "Save Profile & Enter Portal"}
+              </Button>
+            </div>
+          )}
 
         </div>
       </div>

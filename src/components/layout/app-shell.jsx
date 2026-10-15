@@ -114,6 +114,9 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
   const [authChecked, setAuthChecked] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const { data: user } = useCurrentUser();
+  const currentUser = user || (typeof window !== "undefined" ? getCurrentUser() : null) || {};
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (!isAuthenticated()) {
@@ -121,11 +124,29 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
         return;
       }
       setAuthChecked(true);
-    }
-  }, [navigate]);
 
-  const { data: user } = useCurrentUser();
-  const currentUser = user || (typeof window !== "undefined" ? getCurrentUser() : null) || {};
+      const localUser = getCurrentUser();
+      const isStudent = !localUser?.role || localUser?.role === "student";
+      if (isStudent && localUser?.isProfileComplete === false && pathname !== "/profile") {
+        toast.info("Please complete your profile details to get started.", {
+          id: "complete-profile-guard",
+        });
+        navigate({ to: "/profile", search: { setup: "true" } });
+      }
+    }
+  }, [navigate, pathname]);
+
+  useEffect(() => {
+    if (user && authChecked) {
+      const isStudent = !user.role || user.role === "student";
+      if (isStudent && user.isProfileComplete === false && pathname !== "/profile") {
+        toast.info("Please complete your profile details to get started.", {
+          id: "complete-profile-guard",
+        });
+        navigate({ to: "/profile", search: { setup: "true" } });
+      }
+    }
+  }, [user, authChecked, pathname, navigate]);
 
   const handleSignOut = () => {
     logout();
@@ -142,14 +163,9 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
 
   const isGirlsWarden = currentUser.wardenType === "Girls" || currentUser.regNo === "gwarden123";
   const avatarUrl =
-    currentUser.avatar ||
-    (activeRole === "admin"
-      ? "https://i.pravatar.cc/160?img=60"
-      : isGirlsWarden
-        ? "https://i.pravatar.cc/160?img=47"
-        : activeRole === "warden"
-          ? "https://i.pravatar.cc/160?img=68"
-          : "https://i.pravatar.cc/160?img=12");
+    currentUser.avatar && currentUser.avatar.trim() !== ""
+      ? currentUser.avatar
+      : "/default-avatar.svg";
 
   const displayName = currentUser.name || "User";
   const displaySubtext = currentUser.regNo || currentUser.email || "";
@@ -211,7 +227,14 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
 
       <div className="border-t p-3">
         <div className="flex items-center gap-3 rounded-xl p-2">
-          <img src={avatarUrl} alt="" className="size-9 rounded-full object-cover" />
+          <img
+            src={avatarUrl}
+            onError={(e) => {
+              e.currentTarget.src = "/default-avatar.svg";
+            }}
+            alt=""
+            className="size-9 rounded-full object-cover bg-muted"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{displayName}</p>
             <p className="truncate text-xs text-muted-foreground">{displaySubtext}</p>
@@ -368,7 +391,14 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
                     className="ml-1 flex items-center gap-2 rounded-full border p-1 sm:pr-3 transition-colors hover:bg-muted"
                     aria-label="Account menu"
                   >
-                    <img src={avatarUrl} alt="" className="size-7 rounded-full object-cover shrink-0" />
+                    <img
+                      src={avatarUrl}
+                      onError={(e) => {
+                        e.currentTarget.src = "/default-avatar.svg";
+                      }}
+                      alt=""
+                      className="size-7 rounded-full object-cover shrink-0 bg-muted"
+                    />
                     <span className="hidden text-xs sm:text-sm font-medium sm:block max-w-[100px] truncate">
                       {displayName.split(" ")[0]}
                     </span>

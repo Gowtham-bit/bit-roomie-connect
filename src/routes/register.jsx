@@ -69,6 +69,7 @@ function RegisterPage() {
     try {
       const payload = {
         ...data,
+        avatar: photo || "",
         hometown: data.hometown || "Coimbatore",
         language: data.language || "Tamil",
         interests: data.interests ? data.interests.split(",").map(i => i.trim()).filter(Boolean) : ["Coding", "Cricket", "Gaming"],
@@ -89,10 +90,10 @@ function RegisterPage() {
         toast.error("Registration Failed", { description: result.error });
         return;
       }
-      toast.success("Registration & Compatibility Profile Saved!", {
-        description: "Your account and lifestyle responses are now stored in MongoDB Atlas.",
+      toast.success("Account Created Successfully!", {
+        description: "Welcome to BIT Hostel Portal! Review and confirm your profile details.",
       });
-      navigate({ to: "/login" });
+      navigate({ to: "/profile", search: { setup: "true" } });
     } catch (err) {
       toast.error("Registration Error", {
         description: err.message || "Failed to create account.",
@@ -137,37 +138,63 @@ function RegisterPage() {
           <form onSubmit={onSubmit} className="mt-7 space-y-6" noValidate>
             {step === 1 ? (
               <>
-                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed p-5 sm:flex-row sm:items-center">
+                <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed p-5 sm:flex-row sm:items-center">
                   <div className="relative">
-                    {photo ? (
-                      <img
-                        src={photo}
-                        alt="Profile preview"
-                        className="size-20 rounded-2xl object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-20 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                        <Camera className="size-6" />
-                      </div>
-                    )}
+                    <img
+                      src={photo || "/default-avatar.svg"}
+                      alt="Profile preview"
+                      className="size-20 rounded-2xl object-cover ring-2 ring-primary/20 bg-muted shadow-sm"
+                      onError={(e) => {
+                        e.currentTarget.src = "/default-avatar.svg";
+                      }}
+                    />
                   </div>
                   <div className="text-center sm:text-left">
                     <p className="text-sm font-semibold">Profile picture</p>
                     <p className="text-xs text-muted-foreground">
-                      JPG or PNG, passport style, max 2 MB
+                      PNG, JPG, WEBP from device (max 3 MB)
                     </p>
-                    <label className="mt-2 inline-flex cursor-pointer items-center rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-                      Choose file
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) setPhoto(URL.createObjectURL(f));
-                        }}
-                      />
-                    </label>
+                    <div className="mt-2 flex items-center justify-center sm:justify-start gap-2">
+                      <label className="inline-flex cursor-pointer items-center rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors">
+                        Choose from device
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            if (!f.type.startsWith("image/")) {
+                              toast.error("Please select a valid image file (PNG, JPG, WEBP).");
+                              return;
+                            }
+                            if (f.size > 3 * 1024 * 1024) {
+                              toast.error("Image file size must be less than 3MB.");
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setPhoto(ev.target?.result);
+                              toast.success("Profile photo loaded!");
+                            };
+                            reader.readAsDataURL(f);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      {photo && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPhoto("");
+                            toast.info("Profile photo cleared. Default avatar will be used.");
+                          }}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 

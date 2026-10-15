@@ -232,6 +232,7 @@ export async function apiUpdateProfile(payload) {
     body: JSON.stringify(payload),
   });
   if (res && !res.error) {
+    if (res.token) setToken(res.token);
     setCurrentUser(res);
     return res;
   }

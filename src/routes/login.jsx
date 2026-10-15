@@ -62,6 +62,16 @@ function LoginPage() {
         return;
       }
       const activeRole = result?.role || role;
+      const isNewUser = result?.isNewUser || result?.user?.isProfileComplete === false;
+
+      if (isNewUser && activeRole === "student") {
+        toast.success("Welcome to BIT Hostel Portal!", {
+          description: "Please complete your profile details to get started.",
+        });
+        navigate({ to: "/profile", search: { setup: "true" } });
+        return;
+      }
+
       toast.success(`Signed in as ${activeRole.toUpperCase()}`, {
         description: `Welcome back ${result.user?.name || ""}!`,
       });
@@ -85,6 +95,19 @@ function LoginPage() {
         return;
       }
       const activeRole = result?.role || "student";
+      const isNewUser = result?.isNewUser || result?.user?.isProfileComplete === false;
+
+      if (isNewUser) {
+        toast.success("Welcome to BIT Hostel Portal!", {
+          description: "Please complete your student profile details to get started.",
+        });
+        navigate({
+          to: "/profile",
+          search: { setup: "true" },
+        });
+        return;
+      }
+
       toast.success("Signed in with Google", {
         description: `Welcome ${result.user?.name || "Student"}!`,
       });
