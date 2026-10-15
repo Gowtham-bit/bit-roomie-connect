@@ -154,6 +154,21 @@ export async function apiLogin(regNo, password, role) {
   return result;
 }
 
+export async function apiGoogleLogin(token, role = "student") {
+  const result = await request("/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ token, role }),
+  });
+
+  if (result && result.token) {
+    setToken(result.token);
+    if (result.user) setCurrentUser(result.user);
+    return result;
+  }
+
+  return result || { error: "Google sign-in failed. Please verify server connection." };
+}
+
 export async function apiRegister(studentData) {
   const result = await request("/auth/register", {
     method: "POST",

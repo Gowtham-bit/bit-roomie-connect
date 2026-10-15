@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import { apiLogin } from "@/lib/api";
+import { apiLogin, apiGoogleLogin } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -65,6 +66,32 @@ function LoginPage() {
       });
     }
   });
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      if (!credentialResponse?.credential) {
+        toast.error("Google sign-in did not return a valid credential.");
+        return;
+      }
+      const result = await apiGoogleLogin(credentialResponse.credential, role);
+      if (result && result.error) {
+        toast.error("Google Authentication Failed", { description: result.error });
+        return;
+      }
+      const activeRole = result?.role || "student";
+      toast.success("Signed in with Google", {
+        description: `Welcome ${result.user?.name || "Student"}!`,
+      });
+      navigate({
+        to: activeRole === "admin" ? "/admin" : activeRole === "warden" ? "/warden" : "/dashboard",
+      });
+    } catch (err) {
+      toast.error("Google Sign-In Error", {
+        description: err.message || "Failed to authenticate with Google.",
+      });
+    }
+  };
+
   const active = roles.find((r) => r.key === role);
   return (
     <div className="gradient-hero relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-3.5 sm:px-4 py-8 sm:py-14">
@@ -172,7 +199,40 @@ function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        {/* Divider */}
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border/70" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with</span>
+          </div>
+        </div>
+
+        {/* Google Sign-In Component */}
+        <div className="flex flex-col items-center justify-center gap-2">
+          <div className="w-full flex justify-center min-h-[44px]">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                toast.error("Google Sign-In Unsuccessful", {
+                  description:
+                    "Please configure your Google Client ID in Frontend/.env and Backend/backend/.env.",
+                });
+              }}
+              theme="outline"
+              size="large"
+              shape="pill"
+              text="continue_with"
+              width="360"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground text-center">
+            Institutional <span className="font-semibold text-foreground">@bitsathy.ac.in</span> or personal Google account
+          </p>
+        </div>
+
+        <p className="mt-5 text-center text-sm text-muted-foreground">
           New to the hostel portal?{" "}
           <Link to="/register" className="font-semibold text-primary hover:underline">
             Create an account
