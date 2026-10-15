@@ -24,22 +24,45 @@ const API_BASE_URL = getApiBaseUrl();
 
 function getToken() {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("bit_auth_token");
+    return sessionStorage.getItem("bit_auth_token") || localStorage.getItem("bit_auth_token");
   }
   return null;
 }
 
 export function setToken(token) {
   if (typeof window !== "undefined") {
-    if (token) localStorage.setItem("bit_auth_token", token);
-    else localStorage.removeItem("bit_auth_token");
+    if (token) {
+      sessionStorage.setItem("bit_auth_token", token);
+      localStorage.setItem("bit_auth_token", token);
+    } else {
+      sessionStorage.removeItem("bit_auth_token");
+      localStorage.removeItem("bit_auth_token");
+    }
+    window.dispatchEvent(new Event("bit_auth_change"));
+  }
+}
+
+export function isAuthenticated() {
+  if (typeof window === "undefined") return false;
+  // Require active session in sessionStorage for new browser visits
+  const token = sessionStorage.getItem("bit_auth_token");
+  const user = sessionStorage.getItem("bit_user");
+  return Boolean(token && user);
+}
+
+export function logout() {
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("bit_auth_token");
+    sessionStorage.removeItem("bit_user");
+    localStorage.removeItem("bit_auth_token");
+    localStorage.removeItem("bit_user");
     window.dispatchEvent(new Event("bit_auth_change"));
   }
 }
 
 export function getCurrentUser() {
   if (typeof window !== "undefined") {
-    const userStr = localStorage.getItem("bit_user");
+    const userStr = sessionStorage.getItem("bit_user") || localStorage.getItem("bit_user");
     if (userStr) {
       try {
         return JSON.parse(userStr);
@@ -48,13 +71,18 @@ export function getCurrentUser() {
       }
     }
   }
-  return mockCurrentStudent;
+  return null;
 }
 
 export function setCurrentUser(user) {
   if (typeof window !== "undefined") {
-    if (user) localStorage.setItem("bit_user", JSON.stringify(user));
-    else localStorage.removeItem("bit_user");
+    if (user) {
+      sessionStorage.setItem("bit_user", JSON.stringify(user));
+      localStorage.setItem("bit_user", JSON.stringify(user));
+    } else {
+      sessionStorage.removeItem("bit_user");
+      localStorage.removeItem("bit_user");
+    }
     window.dispatchEvent(new Event("bit_auth_change"));
   }
 }
@@ -184,8 +212,17 @@ export async function apiRegister(studentData) {
 }
 
 export async function apiGetMe() {
+  const token = getToken();
+  if (!token) return null;
   const data = await request("/auth/me");
-  if (data && !data.error) return data;
+  if (data && !data.error) {
+    setCurrentUser(data);
+    return data;
+  }
+  if (data?.error && (data.error.includes("expired") || data.error.includes("unauthorized") || data.error.includes("token"))) {
+    logout();
+    return null;
+  }
   return getCurrentUser();
 }
 

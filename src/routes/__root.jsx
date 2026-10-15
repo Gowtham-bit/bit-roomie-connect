@@ -6,12 +6,14 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { isAuthenticated } from "@/lib/api";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -70,6 +72,20 @@ function ErrorComponent({ error, reset }) {
   );
 }
 export const Route = createRootRouteWithContext()({
+  beforeLoad: ({ location }) => {
+    if (typeof window !== "undefined") {
+      const pathname = location.pathname.toLowerCase();
+      const publicPaths = ["/login", "/register"];
+      const isPublic =
+        publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
+        pathname === "/";
+      if (!isPublic && !isAuthenticated()) {
+        throw redirect({
+          to: "/login",
+        });
+      }
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -129,7 +145,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  "your-google-client-id.apps.googleusercontent.com";
+  "1050820316028-rhevkb6moeijfbsb0abdutj7b8nh8qrv.apps.googleusercontent.com";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

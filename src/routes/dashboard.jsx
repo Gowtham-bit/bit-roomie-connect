@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { isAuthenticated } from "@/lib/api";
 import { motion } from "motion/react";
 import {
   BedDouble,
@@ -39,6 +40,11 @@ import {
 } from "@/hooks/use-hostel-api";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
+      throw redirect({ to: "/login" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Student Dashboard · BIT Hostel Portal" },

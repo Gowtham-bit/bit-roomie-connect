@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { motion } from "motion/react";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import { apiLogin, apiGoogleLogin } from "@/lib/api";
+import { apiLogin, apiGoogleLogin, isAuthenticated, getCurrentUser, logout } from "@/lib/api";
 import { GoogleLogin } from "@react-oauth/google";
 
 export const Route = createFileRoute("/login")({
@@ -47,6 +47,12 @@ function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { regNo: "", password: "", remember: true } });
+
+  useEffect(() => {
+    // When visiting the login page, ensure previous session is cleared
+    // so it always asks for fresh login
+    logout();
+  }, []);
 
   const onSubmit = handleSubmit(async (data) => {
     try {

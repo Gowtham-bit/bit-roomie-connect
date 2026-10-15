@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { 
   Bell,
@@ -34,8 +34,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { currentStudent as fallbackStudent, notifications } from "@/lib/mock-data";
+import { notifications } from "@/lib/mock-data";
 import { useCurrentUser } from "@/hooks/use-hostel-api";
+import { isAuthenticated, logout, getCurrentUser } from "@/lib/api";
 import { cn } from "@/lib/utils";
 const studentNav = [
   {
@@ -108,11 +109,28 @@ const wardenNav = [
   },
 ];
 export function AppShell({ role = "student", title, breadcrumb, actions, children }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (!isAuthenticated()) {
+        navigate({ to: "/login" });
+        return;
+      }
+      setAuthChecked(true);
+    }
+  }, [navigate]);
+
   const { data: user } = useCurrentUser();
-  const currentUser = user || fallbackStudent;
+  const currentUser = user || (typeof window !== "undefined" ? getCurrentUser() : null) || {};
+
+  const handleSignOut = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
 
   const activeRole = currentUser.role || (
     currentUser.regNo === "admin123"
@@ -199,20 +217,12 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
             <p className="truncate text-xs text-muted-foreground">{displaySubtext}</p>
           </div>
           <Button
-            asChild
             variant="ghost"
             size="icon"
             aria-label="Sign out"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                localStorage.removeItem("bit_auth_token");
-                localStorage.removeItem("bit_user");
-              }
-            }}
+            onClick={handleSignOut}
           >
-            <Link to="/login">
-              <LogOut className="size-4" />
-            </Link>
+            <LogOut className="size-4" />
           </Button>
         </div>
       </div>
@@ -240,6 +250,17 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
     { to: "/chat", label: "Chat", icon: MessageSquare },
     { to: "/profile", label: "Profile", icon: UserCircle },
   ];
+
+  if (!authChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -373,17 +394,10 @@ export function AppShell({ role = "student", title, breadcrumb, actions, childre
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    asChild
-                    onClick={() => {
-                      if (typeof window !== "undefined") {
-                        localStorage.removeItem("bit_auth_token");
-                        localStorage.removeItem("bit_user");
-                      }
-                    }}
+                    onClick={handleSignOut}
+                    className="cursor-pointer"
                   >
-                    <Link to="/login">
-                      <LogOut className="mr-2 size-4" /> Sign out
-                    </Link>
+                    <LogOut className="mr-2 size-4" /> Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

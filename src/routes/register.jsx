@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { motion } from "motion/react";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DEPARTMENTS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { apiRegister } from "@/lib/api";
+import { apiRegister, isAuthenticated, getCurrentUser } from "@/lib/api";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
