@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAttendance, useMarkAttendance } from "@/hooks/use-hostel-api";
 import { CalendarCheck, UserCheck, Search } from "lucide-react";
-
 export const Route = createFileRoute("/admin/attendance")({
   head: () => ({
     meta: [

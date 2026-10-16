@@ -103,6 +103,24 @@ function ChatPage() {
     currentUser?.role === "admin" ||
     ["a001", "admin123"].includes(currentUidLower);
 
+  // Compute all aliases for current logged-in user
+  const currentAliases = [
+    currentUser.id,
+    currentUser.regNo,
+    (isWarden && currentUser.wardenType === "Boys") || currentUidLower === "warden123" || currentUidLower === "w001" ? "W001" : null,
+    (isWarden && currentUser.wardenType === "Boys") || currentUidLower === "warden123" || currentUidLower === "w001" ? "warden123" : null,
+    (isWarden && currentUser.wardenType === "Girls") || currentUidLower === "gwarden123" || currentUidLower === "w002" ? "W002" : null,
+    (isWarden && currentUser.wardenType === "Girls") || currentUidLower === "gwarden123" || currentUidLower === "w002" ? "gwarden123" : null,
+    isAdmin || currentUidLower === "admin123" || currentUidLower === "a001" ? "A001" : null,
+    isAdmin || currentUidLower === "admin123" || currentUidLower === "a001" ? "admin123" : null,
+  ].filter(Boolean);
+
+  const isMe = (senderId) => {
+    if (!senderId) return false;
+    const sId = String(senderId).trim().toLowerCase();
+    return currentAliases.some((a) => String(a).trim().toLowerCase() === sId);
+  };
+
   const { socket, onlineUsers, isConnected } = useSocket();
 
   const [conversations, setConversations] = useState([]);
@@ -111,6 +129,10 @@ function ChatPage() {
   const [newMessageText, setNewMessageText] = useState("");
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+
+  // Quick Contacts for Wardens / Admin to easily reach registered students
+  const [quickContacts, setQuickContacts] = useState([]);
+  const [loadingQuickContacts, setLoadingQuickContacts] = useState(false);
 
   // Search & New Chat state
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,6 +152,17 @@ function ChatPage() {
   useEffect(() => {
     activeConversationRef.current = activeConversation;
   }, [activeConversation]);
+
+  // Load registered contacts for quick connect
+  useEffect(() => {
+    setLoadingQuickContacts(true);
+    apiSearchUsers("")
+      .then((data) => {
+        setQuickContacts(data || []);
+      })
+      .catch((err) => console.error("Failed to load quick contacts:", err))
+      .finally(() => setLoadingQuickContacts(false));
+  }, [currentUserId]);
 
   // Parse URL search params if target user parameter is passed e.g. /chat?target=S002
   const searchParams = useSearch({ strict: false });
@@ -231,17 +264,25 @@ function ChatPage() {
         ? String(currentActiveConv._id)
         : null;
       const currentRecipient = currentActiveConv?.recipient || {};
-      const currentRecipientId = currentRecipient.id || currentRecipient.regNo;
 
-      // Robust WhatsApp-style matching:
-      // Matches if conversationId matches OR if the message is between you and the current partner!
+      const recipientAliases = [
+        currentRecipient.id,
+        currentRecipient.regNo,
+      ].filter(Boolean).map((a) => String(a).trim().toLowerCase());
+
+      const msgSender = String(incomingMsg.senderId || "").trim().toLowerCase();
+      const msgReceiver = String(incomingMsg.receiverId || "").trim().toLowerCase();
+      const myAliasLower = currentAliases.map((a) => String(a).trim().toLowerCase());
+
+      // Matches if conversationId matches OR if message belongs between me and current active chat partner!
       const isCurrentChat =
         Boolean(activeConvId && incomingConvId === activeConvId) ||
         Boolean(
-          currentRecipientId &&
-          ((incomingMsg.senderId === currentRecipientId && incomingMsg.receiverId === currentUserId) ||
-           (incomingMsg.receiverId === currentRecipientId && incomingMsg.senderId === currentUserId))
+          (recipientAliases.includes(msgSender) && myAliasLower.includes(msgReceiver)) ||
+          (recipientAliases.includes(msgReceiver) && myAliasLower.includes(msgSender))
         );
+
+      const msgIsFromMe = myAliasLower.includes(msgSender);
 
       // A. If message belongs to current active conversation, update messages array immediately
       if (isCurrentChat) {
@@ -269,12 +310,11 @@ function ChatPage() {
           }
 
           // Fallback reconcile for sender's optimistic temp message
-          if (incomingMsg.senderId === currentUserId) {
+          if (msgIsFromMe) {
             const tempIdx = prev.findIndex(
               (m) =>
                 typeof m._id === "string" &&
                 m._id.startsWith("temp_") &&
-                m.senderId === incomingMsg.senderId &&
                 m.text === incomingMsg.text
             );
             if (tempIdx !== -1) {
@@ -294,13 +334,13 @@ function ChatPage() {
         }, 30);
 
         // Mark as read if from other user and play chime
-        if (incomingMsg.senderId !== currentUserId) {
+        if (!msgIsFromMe) {
           socket.emit("mark_as_read", { conversationId: incomingConvId });
           playNotificationSound();
         }
       } else {
         // Incoming message from another conversation
-        if (incomingMsg.senderId !== currentUserId) {
+        if (!msgIsFromMe) {
           playNotificationSound();
         }
       }
@@ -329,7 +369,7 @@ function ChatPage() {
               const isActive = isCurrentChat;
               const newUnread = isActive
                 ? 0
-                : (c.unreadCount || 0) + (incomingMsg.senderId !== currentUserId ? 1 : 0);
+                : (c.unreadCount || 0) + (!msgIsFromMe ? 1 : 0);
               return {
                 ...c,
                 lastMessage: incomingMsg.text,
@@ -631,7 +671,7 @@ function ChatPage() {
                   conversations.map((conv) => {
                     const rec = conv.recipient || {};
                     const recId = rec.id || rec.regNo;
-                    const isOnline = onlineUsers.includes(recId);
+                    const isOnline = onlineUsers.includes(rec.id) || onlineUsers.includes(rec.regNo);
                     const isActive = activeConversation?._id === conv._id;
                     const badge = getContactRoleBadge(rec);
 
@@ -648,7 +688,7 @@ function ChatPage() {
                       >
                         <div className="relative shrink-0">
                           <img
-                            src={rec.avatar || "https://i.pravatar.cc/160?img=1"}
+                            src={rec.avatar || "/default-avatar.svg"}
                             alt=""
                             className="size-11 rounded-full object-cover border"
                           />
@@ -672,7 +712,7 @@ function ChatPage() {
                             )}
                           </div>
                           <p className="text-xs truncate text-muted-foreground mt-0.5">
-                            {conv.lastMessageSender === currentUserId ? "You: " : ""}
+                            {isMe(conv.lastMessageSender) ? "You: " : ""}
                             {conv.lastMessage || "Click to start chatting"}
                           </p>
                         </div>
@@ -687,14 +727,14 @@ function ChatPage() {
                   })
                 ) : (
                   <div className="p-6 text-center text-xs text-muted-foreground space-y-2">
-                    <p>No conversations yet.</p>
+                    <p>No active conversations yet.</p>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setShowUserSearch(true)}
                       className="rounded-xl text-xs"
                     >
-                      {isStudent ? "Contact Warden or Admin" : "Start a chat"}
+                      {isStudent ? "Contact Warden or Admin" : "Message Registered Student"}
                     </Button>
                   </div>
                 )}
@@ -725,7 +765,7 @@ function ChatPage() {
                   </Button>
                   <div className="relative shrink-0">
                     <img
-                      src={recipient.avatar || "https://i.pravatar.cc/160?img=1"}
+                      src={recipient.avatar || "/default-avatar.svg"}
                       alt=""
                       className="size-9 sm:size-10 rounded-full object-cover border"
                     />
@@ -764,17 +804,17 @@ function ChatPage() {
                 ) : messages.length > 0 ? (
                   <div className="space-y-3">
                     {messages.map((msg) => {
-                      const isMe = msg.senderId === currentUserId;
+                      const msgIsMe = isMe(msg.senderId);
 
                       return (
                         <div
-                          key={msg._id || msg.createdAt}
-                          className={cn("flex flex-col max-w-[88%] sm:max-w-[70%]", isMe ? "ml-auto items-end" : "mr-auto items-start")}
+                          key={msg._id || msg.tempId || msg.createdAt}
+                          className={cn("flex flex-col max-w-[88%] sm:max-w-[70%]", msgIsMe ? "ml-auto items-end" : "mr-auto items-start")}
                         >
                           <div
                             className={cn(
                               "px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs",
-                              isMe
+                              msgIsMe
                                 ? "bg-primary text-primary-foreground rounded-br-xs"
                                 : "bg-muted text-foreground rounded-bl-xs"
                             )}
@@ -785,7 +825,7 @@ function ChatPage() {
                             <span>
                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
-                            {isMe && (
+                            {msgIsMe && (
                               <span>
                                 {msg.isRead ? (
                                   <CheckCheck className="size-3 text-primary" />
@@ -931,12 +971,79 @@ function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center p-8 text-muted-foreground max-w-sm">
-              <MessageSquare className="size-12 mx-auto text-muted-foreground/40 mb-3" />
+            <div className="text-center p-6 sm:p-8 max-w-lg w-full overflow-y-auto max-h-full">
+              <div className="size-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+                <MessageSquare className="size-7" />
+              </div>
               <h3 className="font-bold text-lg text-foreground">Hostel Communication Desk</h3>
-              <p className="text-xs mt-1">
-                Select a conversation from the sidebar or click &ldquo;New Chat&rdquo; to connect with students, wardens, or administrators.
+              <p className="text-xs text-muted-foreground mt-1 mb-5 leading-relaxed">
+                Connect directly with registered students and staff for inquiries, notifications, and room allocations.
               </p>
+
+              <div className="space-y-2 text-left">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-[11px] font-bold tracking-wider uppercase text-muted-foreground">
+                    Registered Students & Contacts ({quickContacts.length})
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-[11px] text-primary px-2"
+                    onClick={() => {
+                      setShowUserSearch(true);
+                      setSearchQuery("");
+                    }}
+                  >
+                    Search All
+                  </Button>
+                </div>
+
+                {loadingQuickContacts ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">Loading registered students...</p>
+                ) : quickContacts.length > 0 ? (
+                  <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                    {quickContacts.map((contact) => {
+                      const badge = getContactRoleBadge(contact);
+                      const isOnline = onlineUsers.includes(contact.id) || onlineUsers.includes(contact.regNo);
+                      return (
+                        <button
+                          key={contact.id || contact.regNo}
+                          type="button"
+                          onClick={() => handleSelectUser(contact.id || contact.regNo)}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-accent/60 hover:border-primary/40 transition-all group text-left"
+                        >
+                          <div className="relative shrink-0">
+                            <img
+                              src={contact.avatar || "/default-avatar.svg"}
+                              alt=""
+                              className="size-10 rounded-full border object-cover shrink-0"
+                            />
+                            {isOnline && (
+                              <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-background" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-semibold truncate group-hover:text-primary">{contact.name}</p>
+                              <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none rounded shrink-0", badge.className)}>
+                                {badge.label}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {contact.dept || contact.department || "Student"} {contact.regNo ? `· ${contact.regNo}` : ""}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] shrink-0 font-normal group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
+                            Chat
+                          </Badge>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-4">No registered users found.</p>
+                )}
+              </div>
             </div>
           )}
         </div>

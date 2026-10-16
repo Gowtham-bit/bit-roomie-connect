@@ -460,13 +460,9 @@ export async function apiSearchUsers(query = "") {
   const data = await request(`/chat/users?query=${encodeURIComponent(query)}`);
   if (data && !data.error && Array.isArray(data)) return data;
 
-  // Fallback if backend server unreachable or in offline preview
+  // Fallback if backend server unreachable or in offline preview (authorities only, no dummy mock students)
   const user = getCurrentUser() || {};
   const currentUid = (user.id || user.regNo || "").toLowerCase();
-  const isAuth =
-    user.role === "admin" ||
-    user.role === "warden" ||
-    ["a001", "admin123", "w001", "warden123", "w002", "gwarden123"].includes(currentUid);
 
   const q = query.toLowerCase().trim();
   const authorities = [
@@ -475,31 +471,12 @@ export async function apiSearchUsers(query = "") {
     { id: "A001", regNo: "admin123", name: "System Administrator", role: "admin", avatar: "https://i.pravatar.cc/160?img=68", dept: "Hostel IT & Operations", title: "Mr. R. Arun (Chief Administrator)" },
   ].filter((a) => a.id.toLowerCase() !== currentUid && a.regNo.toLowerCase() !== currentUid);
 
-  const matchedAuthorities = authorities.filter(
+  return authorities.filter(
     (w) =>
       !q ||
       w.name.toLowerCase().includes(q) ||
       w.dept.toLowerCase().includes(q) ||
       (w.title && w.title.toLowerCase().includes(q))
   );
-
-  // If user is a student, ONLY authorities are permitted
-  if (!isAuth) {
-    return matchedAuthorities;
-  }
-
-  const matchedStudents = mockStudents
-    .filter(
-      (s) =>
-        s.id.toLowerCase() !== currentUid &&
-        s.regNo.toLowerCase() !== currentUid &&
-        (!q ||
-          s.name.toLowerCase().includes(q) ||
-          s.regNo.toLowerCase().includes(q) ||
-          (s.dept || s.department || "").toLowerCase().includes(q))
-    )
-    .slice(0, 20);
-
-  return [...matchedAuthorities, ...matchedStudents];
 }
 
