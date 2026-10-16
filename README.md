@@ -1,7 +1,11 @@
 # BIT Campus Connect
 
-Project Title
+## 🌐 Live Deployment
+- **Frontend URL**: [https://bit-hostel.vercel.app](https://bit-hostel.vercel.app/) (Hosted on **Vercel**)
+- **Backend API URL**: [https://bit-roomie-connect-backend.onrender.com](https://bit-roomie-connect-backend.onrender.com) (Hosted on **Render**)
+- **API Health Check**: [https://bit-roomie-connect-backend.onrender.com/api/health](https://bit-roomie-connect-backend.onrender.com/api/health)
 
+### Project Title
 BIT Hostel Room Allocation System and Roommate Compatibility Matchmaking Portal
 
 Project Description
